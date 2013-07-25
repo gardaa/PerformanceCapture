@@ -1,8 +1,13 @@
-# C++ objects and libs
+/3rdParty
+/bin
+*.tlog
+*.swp
 
+# C++ objects and libs
 *.slo
 *.lo
 *.o
+*.obj
 *.a
 *.la
 *.lai
@@ -10,8 +15,23 @@
 *.dll
 *.dylib
 
-# Qt-es
+# VisualStudio
+*.lastbuildstate
+*.cache
+*.manifest
+*.log
+*.exe
+*.pdb
+*.unsuccessfulbuild
+*.user
+*.ipch
+*.sdf
+*.suo
+*.idb
+*.ilk
+*.opensdf
 
+# Qt-es
 *.pro.user
 *.pro.user.*
 moc_*.cpp
