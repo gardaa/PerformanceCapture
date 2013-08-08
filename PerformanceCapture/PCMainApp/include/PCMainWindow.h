@@ -4,9 +4,11 @@
 #include <QMainWindow>
 
 class FrameViewer;
+class PCMainAppMenu;
 class QTimer;
 
-class PCMainWindow : public QMainWindow
+class PCMainWindow
+    :   public QMainWindow
 {
     Q_OBJECT
     
@@ -15,9 +17,9 @@ public:
     ~PCMainWindow();
 
 private:
+    // Widgets
     FrameViewer*    m_frameViewer;
-
-    QTimer*         m_updateTimer;
+    PCMainAppMenu*  m_leftMenu;
 };
 
 #endif // PCMAINWINDOW_H

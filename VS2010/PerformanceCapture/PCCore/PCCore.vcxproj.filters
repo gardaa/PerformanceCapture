@@ -11,30 +11,51 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\ErrChk.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreExport.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CoreFrameBuffer.h">
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCommon.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CoreFrameObserver.h">
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrameObserver.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CoreFrame.h">
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreSystem.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrame.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreErrChk.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCamera.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreStereoCameraPair.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCalibrationHelper.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CoreFrameBuffer.cpp">
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreFrame.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CoreFrameObserver.cpp">
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreSystem.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CoreFrame.cpp">
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreFrameObserver.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCamera.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreStereoCameraPair.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCalibrationHelper.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

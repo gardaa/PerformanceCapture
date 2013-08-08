@@ -1,6 +1,5 @@
 #include "ParameterHandler.h"
 
-int ParameterHandler::m_refreshTimeout = 16;
 const int& ParameterHandler::GetRefreshTimeout ()
 {
     return m_refreshTimeout;
@@ -8,14 +7,23 @@ const int& ParameterHandler::GetRefreshTimeout ()
 void ParameterHandler::SetRefreshTimeout ( const int& iTimeout )
 {
     m_refreshTimeout = iTimeout;
+
+    emit refreshTimeoutChanged ( iTimeout );
 }
 
-int ParameterHandler::m_viewportCols = 2;
 const int& ParameterHandler::GetViewportCols ()
 {
     return m_viewportCols;
 }
 void ParameterHandler::SetViewportCols ( const int& iViewportCols )
 {
-    m_refreshTimeout = iViewportCols;
+    m_viewportCols = iViewportCols;
+
+    emit numColsChanged ( iViewportCols );
 }
+
+ParameterHandler::ParameterHandler ()
+    :   QObject ()
+    ,   m_refreshTimeout ( 16 )
+    ,   m_viewportCols ( 2 )
+{}

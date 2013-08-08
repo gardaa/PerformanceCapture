@@ -1,7 +1,8 @@
-#include "ErrChk.h"
+#include "PCCoreErrChk.h"
 #include "PCMainWindow.h"
 #include "FrameViewer.h"
 #include "ParameterHandler.h"
+#include "PCMainAppMenu.h"
 
 #include <QTimer>
 #include <VimbaCPP/Include/VimbaSystem.h>
@@ -17,20 +18,25 @@ PCMainWindow::PCMainWindow ( QWidget *iParent )
     err = vmbs.Startup ();
     ERR_CHK ( err, VmbErrorSuccess, "Error initializing VimbaSystem." );
 
+    ParameterHandler& params = ParameterHandler::Instance ();
+
     // Member initialization.
     m_frameViewer = new FrameViewer ( this );
-    m_updateTimer = new QTimer ( this );
-    m_updateTimer->setInterval ( ParameterHandler::GetRefreshTimeout() );
-    m_updateTimer->start ();
+    m_leftMenu = new PCMainAppMenu ( this );
 
-    // Wiring.
+    // Wiring
     connect (
-        m_updateTimer, SIGNAL ( timeout  () ),
-        m_frameViewer, SLOT   ( updateGL () )
+              &params, SIGNAL ( numColsChanged ( int ) ),
+        m_frameViewer, SLOT   ( setNumColumns  ( int ) )
+    );
+    connect (
+           m_leftMenu, SIGNAL ( calibrationClicked () ),
+        m_frameViewer, SLOT   ( calibrateCameras   () )
     );
 
     // Widget setup.
     setCentralWidget ( m_frameViewer );
+    addDockWidget ( Qt::DockWidgetArea::LeftDockWidgetArea, m_leftMenu );
 }
 
 PCMainWindow::~PCMainWindow()

@@ -19,16 +19,33 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CoreFrame.h" />
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CoreFrameObserver.h" />
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\ErrChk.h" />
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CoreFrameBuffer.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCalibrationHelper.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCamera.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrame.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrameObserver.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreErrChk.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreStereoCameraPair.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreSystem.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCommon.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreExport.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CoreFrame.cpp" />
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CoreFrameBuffer.cpp" />
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CoreFrameObserver.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCalibrationHelper.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCamera.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreFrame.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreStereoCameraPair.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreSystem.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreFrameObserver.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C6EDDEEA-1D63-459D-A8C7-C9434628F15A}</ProjectGuid>
@@ -74,45 +91,45 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <OutDir>..\..\..\bin\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>..\..\..\bin\$(PlatformArchitecture)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <OutDir>..\..\..\bin\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>..\..\..\bin\$(PlatformArchitecture)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <OutDir>..\..\..\bin\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>..\..\..\bin\$(PlatformArchitecture)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <OutDir>..\..\..\bin\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>..\..\..\bin\$(PlatformArchitecture)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\x86\include;..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN$(PlatformArchitecture);PCCORE_LIBRARY;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>boost_thread-vc100-mt-gd-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OPENCV_DIR)\x86\lib\;$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_highgui246d.lib;opencv_calib3d246d.lib;opencv_core246d.lib;opencv_imgproc246d.lib;opencv_gpu246d.lib;boost_thread-vc100-mt-gd-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\x64\include;..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN$(PlatformArchitecture);PCCORE_LIBRARY;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>boost_thread-vc100-mt-gd-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OPENCV_DIR)\x64\lib\;$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_highgui246d.lib;opencv_calib3d246d.lib;opencv_core246d.lib;opencv_imgproc246d.lib;opencv_gpu246d.lib;boost_thread-vc100-mt-gd-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,15 +138,15 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\x86\include;..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN$(PlatformArchitecture);PCCORE_LIBRARY;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>boost_thread-vc100-mt-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OPENCV_DIR)\x86\lib\;$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_highgui246.lib;opencv_calib3d246.lib;opencv_core246.lib;opencv_imgproc246.lib;opencv_gpu246.lib;boost_thread-vc100-mt-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,15 +155,15 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\x64\include;..\..\..\PerformanceCapture\PCCore\include;$(VIMBA_HOME);$(BOOSTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN$(PlatformArchitecture);PCCORE_LIBRARY;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>boost_thread-vc100-mt-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OPENCV_DIR)\x64\lib\;$(VIMBA_HOME)VimbaCPP\Lib\Win$(PlatformArchitecture);$(BOOSTDIR)\stage\lib$(PlatformArchitecture);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_highgui246.lib;opencv_calib3d246.lib;opencv_core246.lib;opencv_imgproc246.lib;opencv_gpu246.lib;boost_thread-vc100-mt-1_54.lib;VimbaCPP.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

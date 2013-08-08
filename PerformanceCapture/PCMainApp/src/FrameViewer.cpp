@@ -1,7 +1,8 @@
+#include "PCCoreErrChk.h"
 #include "FrameViewer.h"
-#include "CoreFrameBuffer.h"
+#include "PCCoreSystem.h"
+#include "PCCoreFrame.h"
 #include "ParameterHandler.h"
-#include "ErrChk.h"
 
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -9,33 +10,41 @@
 #include <fstream>
 #include <iostream>
 
+#include <QTimer>
+
 FrameViewer::FrameViewer ( QWidget *iParent )
     :   QGLWidget ( iParent ),
-        m_nCols ( ParameterHandler::GetViewportCols () )
+        m_nCols ( 0 )
 {
-    m_width     =   1280;
-    m_height    =    720;
-    
-    CoreFrameBuffer& fb = CoreFrameBuffer::GetInstance ();
-    
-    unsigned int nFrames = fb.GetAllFrames ().size ();
-    m_nRows = (nFrames / m_nCols);
-    if ( nFrames % m_nCols ) {
-        m_nRows++;
-    }
+    ParameterHandler& params = ParameterHandler::Instance ();
 
-    fb.StartCapture ();
+    m_updateTimer = new QTimer ( this );
+    m_updateTimer->setInterval ( params.GetRefreshTimeout() );
+    m_updateTimer->start ();
+
+    // Wiring.
+    connect (
+        m_updateTimer, SIGNAL ( timeout  () ),
+                 this, SLOT   ( updateGL () )
+    );
     
-    m_textures = new GLuint[nFrames];
-    glGenTextures(nFrames, m_textures);
+    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    unsigned int nFrames = cs.GetNumFrames ();
+
+    //cs.StartCapture ();
+    
+    m_textures = new GLuint[10];
+    glGenTextures ( nFrames, m_textures );
+
+    setNumColumns ( params.GetViewportCols () );
 }
 
 FrameViewer::~FrameViewer ()
 {
-    CoreFrameBuffer& reader = CoreFrameBuffer::GetInstance ();
-    reader.EndCapture ();
+    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    cs.EndCapture ();
     
-    CoreFrameBuffer::DestroyInstance ();
+    PCCoreSystem::DestroyInstance ();
 
     if ( m_textures ) {
         delete m_textures;
@@ -47,7 +56,7 @@ void FrameViewer::initializeGL ()
 {
     glEnable (GL_TEXTURE_2D);
     glShadeModel (GL_SMOOTH);
-    glClearColor ( 100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 1.0f );
+    glClearColor ( 0.39f, 0.58f, 0.93f, 1.0f );
     glClearDepth (1.0f);
     glEnable (GL_DEPTH_TEST);
     glDepthFunc (GL_LEQUAL);
@@ -60,61 +69,67 @@ void FrameViewer::resizeGL ( int w, int h )
 }
 void FrameViewer::paintGL ()
 {
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    CoreFrameBuffer& reader = CoreFrameBuffer::GetInstance ();
-    const FramePtrVector& frames = reader.GetAllFrames ();
-    
-    const int nf = frames.size ();
-    for ( unsigned int f = 0; f < nf; f++ ) {
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    cs.UpdateCameras ();
+
+    std::vector<std::string> cameras = cs.GetCameraList ();
+
+    const int nc = cameras.size ();
+    AdjustGrid ( nc );
+    for ( unsigned int f = 0; f < nc; f++ ) {
         const int r = f / m_nCols;
         const int c = f % m_nCols;
 
+        std::string const& status = cs.GetCameraStatus ( cameras[f] );
+        PCCoreFrame const& frame = cs.GetFrameFromCamera ( cameras[f] );
+
+        //std::cout << "Camera " << cameras[f] << ": " << status << std::endl;
+        
         glBindTexture (GL_TEXTURE_2D, m_textures[f]);
-        DrawFrame ( r, c, frames[f] );
+        DrawFrame ( r, c, frame, status );
     }
     //DrawFrame ( 0, 0, frames[0] );
     //DrawFrame ( 0, 1, frames[1] );
 }
 void FrameViewer::setNumColumns ( int c )
 {
+    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
     m_nCols = c;
+    AdjustGrid ( cs.GetNumFrames () );
 }
 
-void FrameViewer::DrawFrame ( const int &row, const int &col, const FramePtr &frame )
+void FrameViewer::calibrateCameras ()
 {
-    if ( SP_ISNULL (frame) ) {
-        std::cout << "Null frame ptr" << std::endl;
-        return;
-    }
+    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+
+    cs.CalibrateCameras ();
+}
+
+void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFrame const& frame, std::string const& cameraStatus )
+{
     int vpw = m_width  / m_nCols;
     int vph = m_height / m_nRows;
     int vpx = col * vpw;
     int vpy = m_height - (row+1) * vph;
     
-    VmbErrorType err;
-    VmbUint32_t width, height;
-    err = frame->GetHeight (height);
-    ERR_CHK ( err, VmbErrorSuccess, "Error reading frame height." );
-    err = frame->GetWidth (width);
-    ERR_CHK ( err, VmbErrorSuccess, "Error reading frame width." );
+    unsigned int fWidth = frame.Width ();
+    unsigned int fHeight = frame.Height ();
+    unsigned int numChannels;
+    unsigned char const* frameData;
+    frame.GetData ( frameData, numChannels );
 
-    //std::cout << "Drawing " << width << "x" << height << std::endl;
-
-    VmbPixelFormatType pixelFormat;
-    err = frame->GetPixelFormat (pixelFormat);
-    ERR_CHK ( err, VmbErrorSuccess, "Error reading frame pixel format data." );
-    
     GLint glPixelFormat;
-    switch (pixelFormat) {
-    case VmbPixelFormatBayerGR8:
-        glPixelFormat = GL_RGB;
-        break;
-
-    case VmbPixelFormatMono8:
+    switch (numChannels) {
+    case 1:
         glPixelFormat = GL_LUMINANCE;
         break;
 
-    case VmbPixelFormatRgb8:
+    case 2:
+        glPixelFormat = GL_RG;
+        break;
+
+    case 3:
         glPixelFormat = GL_RGB;
         break;
 
@@ -125,25 +140,7 @@ void FrameViewer::DrawFrame ( const int &row, const int &col, const FramePtr &fr
     
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    
-    //GLubyte* tex_data = new GLubyte[3*width*height];
-    //GLfloat sz = (width*height);
-    //for ( unsigned int i = 0; i < height; i++ ) {
-    //    for ( unsigned int j = 0; j < width; j++ ) {
-    //        GLuint val = 255u*(i+j)/(height+width);
-    //        
-    //        tex_data[ 3 * (width*i + j) + 0 ] = (GLubyte)val;
-    //        tex_data[ 3 * (width*i + j) + 1 ] = (GLubyte)val;
-    //        tex_data[ 3 * (width*i + j) + 2 ] = (GLubyte)val;
-    //    }
-    //}
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex_data);
-
-    VmbUchar_t* tex_data = (VmbUchar_t*)0x0;
-    err = frame->GetImage( tex_data );
-    
-    ERR_CHK ( err, VmbErrorSuccess, "Error reading frame texture data." );
-    glTexImage2D(GL_TEXTURE_2D, 0, glPixelFormat, width, height, 0, glPixelFormat, GL_UNSIGNED_BYTE, tex_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, glPixelFormat, fWidth, fHeight, 0, glPixelFormat, GL_UNSIGNED_BYTE, frameData);
 
     glPushMatrix ();
 
@@ -152,8 +149,8 @@ void FrameViewer::DrawFrame ( const int &row, const int &col, const FramePtr &fr
     glViewport ( vpx, vpy, vpw, vph );
     glOrtho ( 0.0, (GLdouble)vpw, (GLdouble)vph, 0.0, -1.0, 1.0 );
 
-    GLfloat imgRatio = (GLfloat)width / (GLfloat)height;
-    GLfloat vwpRatio = (GLfloat)vpw   / (GLfloat)vph;
+    GLfloat imgRatio = (GLfloat)fWidth / (GLfloat)fHeight;
+    GLfloat vwpRatio = (GLfloat)vpw    / (GLfloat)vph;
 
     GLfloat mX = 0.0f, mY = 0.0f;
     GLfloat rHei = vpw, rWid = vph;
@@ -172,6 +169,7 @@ void FrameViewer::DrawFrame ( const int &row, const int &col, const FramePtr &fr
     GLfloat left = mX,  right = left + rWid;
 
     glBegin ( GL_QUADS );
+        glColor3f( 1.0f, 1.0f, 1.0f );
         glTexCoord2f ( 1.0f, 0.0f );
         glVertex2f ( right, top );
         
@@ -183,23 +181,46 @@ void FrameViewer::DrawFrame ( const int &row, const int &col, const FramePtr &fr
         
         glTexCoord2f ( 1.0f, 1.0f );
         glVertex2f ( right, bottom );
+
     glEnd ();
     
-    //glDisable ( GL_TEXTURE_2D );
-    //glBegin (GL_LINES);
-    //    glVertex2i (       0,       0 );
-    //    glVertex2i ( vpw,       0 );
-    //    
-    //    glVertex2i ( vpw,       0 );
-    //    glVertex2i ( vpw, vph - 1 );
-    //    
-    //    glVertex2i ( vpw, vph - 1 );
-    //    glVertex2i (       1, vph - 1 );
-    //    
-    //    glVertex2i (       1, vph - 1 );
-    //    glVertex2i (       1,       0 );
-    //glEnd ();
-    //glEnable ( GL_TEXTURE_2D );
+    glDisable ( GL_TEXTURE_2D );
+
+
+    float sWid = 0.01f * rWid;
+    float sHei = 0.01f * rWid;
+
+    top += 2 * sHei;
+    right -= 2 * sWid;
+    
+    left = right - 10.0f;
+    bottom = top + 10.0f;
+    
+    glBegin (GL_QUADS);
+        if ( cameraStatus.compare ( "Off" ) == 0 ) {
+            glColor3f( 1.0f, 0.0f, 0.0f );
+        } else if ( cameraStatus.compare ("Master") == 0 ) {
+            glColor3f( 0.0f, 1.0f, 0.0f );
+        } else if ( cameraStatus.compare ("Slave") == 0 ) {
+            glColor3f( 0.0f, 0.0f, 1.0f );
+        } else {
+            glColor3f( 1.0f, 1.0f, 0.0f );
+        }
+
+        glVertex2f ( right, top );
+        glVertex2f ( left, top );
+        glVertex2f ( left, bottom );
+        glVertex2f ( right, bottom );
+    glEnd ();
+    glEnable ( GL_TEXTURE_2D );
 
     glPopMatrix ();
+}
+
+void FrameViewer::AdjustGrid ( int const& nElems )
+{
+    m_nRows = (nElems / m_nCols);
+    if ( nElems % m_nCols ) {
+        m_nRows++;
+    }
 }
