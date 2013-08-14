@@ -3,33 +3,60 @@
 
 #include <string>
 
-class PCCoreCamera;
 class PCCoreFrame;
-namespace cv {
-    namespace gpu {
-        class GpuMat;
-    }
-    class Mat;
-}
+
+enum CalibrationState;
+
+#include "PCCoreCamera.h"
+#include <opencv2/opencv.hpp>
 
 class PCCoreStereoCameraPair
 {
 public:
-    PCCoreStereoCameraPair ();
+    PCCoreStereoCameraPair (
+        PCCoreCameraPtr         iLeft,
+        PCCoreCameraPtr         iRight
+    );
     ~PCCoreStereoCameraPair ();
 
     void Calibrate ();
 
-private:
-    unsigned int*                   m_refCount;
+    void OnCameraCalibrated ( PCCoreCamera* iCamera, CalibrationState iOldState, CalibrationState iNewState );
 
-    PCCoreCamera*                   m_left;
-    PCCoreCamera*                   m_right;
+    inline PCCoreCameraPtr const GetLeft () const { return m_left; }
+    inline void SetLeft ( PCCoreCameraPtr const iNewLeft ) {
+        m_left = iNewLeft;
+        m_left->RegisterCallback ( this, &PCCoreStereoCameraPair::OnCameraCalibrated );
+    }
+    inline PCCoreCameraPtr const GetRight () const { return m_right; }
+    inline void SetRight ( PCCoreCameraPtr const iNewRight ) {
+        m_right = iNewRight;
+        m_right->RegisterCallback ( this, &PCCoreStereoCameraPair::OnCameraCalibrated );
+    }
+
+    inline CalibrationState GetCalibrationState ()
+    {
+        if ( m_left->GetCalibrationState () == m_right->GetCalibrationState () ) {
+            return m_left->GetCalibrationState ();
+        } else {
+            return UNKNOWN;
+        }
+    }
+
+private:
+    PCCoreStereoCameraPair ( PCCoreStereoCameraPair const& iOther ) {}
+    PCCoreStereoCameraPair& operator= ( PCCoreStereoCameraPair const& iOther ) {}
+
+private:
+    PCCoreCameraPtr                     m_left;
+    PCCoreCameraPtr                     m_right;
     
-    cv::Mat*                        m_stereoRotation;
-    cv::Mat*                        m_stereoTranslation;
-    cv::Mat*                        m_stereoEssential;
-    cv::Mat*                        m_stereoFundamental;
+    cv::Mat                             m_stereoRotation;
+    cv::Mat                             m_stereoTranslation;
+    cv::Mat                             m_stereoEssential;
+    cv::Mat                             m_stereoFundamental;
 };
+
+typedef boost::shared_ptr<PCCoreStereoCameraPair> PCCoreStereoCameraPairPtr;
 
 #endif // PCCORESTEREOCAMERAPAIR_H

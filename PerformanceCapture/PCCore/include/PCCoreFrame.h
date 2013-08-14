@@ -3,11 +3,12 @@
 
 #include "PCCoreExport.h"
 
-namespace cv {
-class Mat;
-namespace gpu {
-class GpuMat;
-}}
+#include <opencv2/opencv.hpp>
+#include <opencv2/gpu/gpu.hpp>
+
+#define BOOST_ALL_DYN_LINK
+#include <boost/thread/thread.hpp>
+#include <boost/shared_ptr.hpp>
 
 class PCCoreFrame
 {
@@ -34,9 +35,10 @@ public:
         unsigned char const*&   oData,
         unsigned int&           oNumChannels
     ) const;
-    PCCORE_EXPORT cv::Mat const& GetImagePoints () const;
+    PCCORE_EXPORT cv::Mat const& GetImagePoints () const { return (m_cpuImage); }
     // }
 
+private:
     // Copy operations {
     PCCORE_EXPORT PCCoreFrame (
         PCCoreFrame const&      iOther
@@ -46,6 +48,7 @@ public:
     );
     // }
 
+public:
     void Reset (
         unsigned int const&     iWidth,
         unsigned int const&     iHeight,
@@ -53,13 +56,17 @@ public:
         unsigned char const*&   iData
     );
 
-private:
-    // Reference counting for memory handling
-    unsigned int*               m_refCount;
+    void Lock () { m_mutex.lock (); }
+    void Unlock () { m_mutex.unlock (); }
 
+private:
+    boost::mutex                m_mutex;
+    
     // Data containers
-    cv::gpu::GpuMat*            m_gpuImage;
-    cv::Mat*                    m_cpuImage;
+    cv::gpu::GpuMat             m_gpuImage;
+    cv::Mat                     m_cpuImage;
 };
+
+typedef boost::shared_ptr<PCCoreFrame> PCCoreFramePtr;
 
 #endif // PCCOREFRAME_H

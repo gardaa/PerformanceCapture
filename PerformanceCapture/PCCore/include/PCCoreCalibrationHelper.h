@@ -1,11 +1,13 @@
 #pragma once
 
 #include "PCCoreFrame.h"
-#include "PCCoreCamera.h"
+
+class PCCoreCamera;
 
 #define BOOST_ALL_DYN_LINK
 #include <boost/thread/thread.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/function.hpp>
 
 #include <unordered_map>
 #include <queue>
@@ -25,6 +27,10 @@ public:
     inline std::vector< cv::Point3f > const& GetPoints () const { return m_points; }
     inline cv::Size const& GetSize () const { return m_size; }
 
+    std::vector< std::vector< cv::Point3f > > CreateInputArray (
+        unsigned int        iFrameCount
+    );
+
 private:
     cv::Size                    m_size;
     float                       m_squareSize;
@@ -33,70 +39,85 @@ private:
 
 class PCCoreCalibrationHelper
 {
-private:
-    template<class T>
-    class StringMap {
-    private:
-        StringMap() {};
-    public:
-        typedef std::unordered_map<std::string, T> type;
-    };
-
-public:
-    enum CalibrationState {
-        UNKNOWN     =   0x00,
-        ACQUIRING   =   0x01,
-        CALIBRATING =   0x02,
-        CALIBRATED  =   0x03,
-    };
-
 public:
     static PCCoreCalibrationHelper& GetInstance ();
     static void DestroyInstance ();
-    
+
     ~PCCoreCalibrationHelper ();
 
-    void StartCalibration ();
-    void AbortCalibration ();
-    bool RegisterCamera ( PCCoreCamera const& iCamera );
-    bool UnregisterCamera ( PCCoreCamera const& iCamera );
-    bool RegisterFrame ( std::string const& iCameraId, PCCoreFrame const& iFrame );
-    void ProcessCalibration (
-        std::string     iCamId
-    );
-
-    inline CalibrationState const& CurrentState () const { return m_state; }
     inline unsigned int const& FrameDelay () const { return m_frameDelay; }
+    inline unsigned int const& FrameCount () const { return m_frameCount; }
+    std::vector< std::vector< cv::Point3f > > GetChessboardPoints ();
+    inline cv::Size const& GetChessboardSize () { return sm_chessboard.GetSize(); }
 
 private:
     PCCoreCalibrationHelper ();
     inline explicit PCCoreCalibrationHelper ( PCCoreCalibrationHelper const& iOther ) {}
     inline PCCoreCalibrationHelper& operator= ( PCCoreCalibrationHelper const& iOther ) {}
 
-    void Reset ();
+private:
+    static PCCoreCalibrationHelper*     sm_pInstance;
+    static Chessboard                   sm_chessboard;
 
-    void CheckCalibrationDone (
-        PCCoreCamera&                               iCamera,
-        std::vector< std::vector < cv::Point2f > >& iDetectedCorners
-    );
+    unsigned int                        m_frameDelay;
+    unsigned int                        m_frameCount;
+    unsigned int                        m_calibratedCameras;
+};
+
+enum CalibrationState {
+    UNKNOWN     =   0x00,
+    ACQUIRING   =   0x01,
+    CALIBRATING =   0x02,
+    CALIBRATED  =   0x03,
+};
+
+class PCCoreCameraCalibration {
+private:
+    typedef boost::function3<void, PCCoreCamera*, CalibrationState, CalibrationState> CallbackFn;
+
+public:
+    PCCoreCameraCalibration ( PCCoreCamera* iParent );
+    ~PCCoreCameraCalibration ();
+
+    void StartCalibration ();
+    void AbortCalibration ();
+    void Process ();
+    void PushFrame ( PCCoreFramePtr const& iFrame );
+    CalibrationState GetCalibrationState ();
+    double GetCalibrationProgress () const;
+    std::vector< std::vector<cv::Point2f> > const& GetChessboardCorners () const { return m_corners; }
+
+    inline void RegisterCallback ( void (*iFunc)(PCCoreCamera*, CalibrationState, CalibrationState) )
+    {
+        m_listeners.push_back ( CallbackFn ( iFunc ) );
+    }
+
+    template<typename T>
+    inline void RegisterCallback ( T* iObj, void (T::*iFunc)(PCCoreCamera*, CalibrationState, CalibrationState) )
+    {
+        m_listeners.push_back ( CallbackFn ( boost::bind ( iFunc, iObj, _1, _2, _3 ) ) );
+    }
 
 private:
-    static PCCoreCalibrationHelper*                                 sm_pInstance;
-    static Chessboard                                               sm_chessboard;
+    PCCoreCameraCalibration ( PCCoreCameraCalibration const& iOther) {}
+    PCCoreCameraCalibration& operator= ( PCCoreCameraCalibration const& iOther ) {}
 
-    boost::shared_mutex                                             m_mutex;
-    //boost::mutex                                                    m_mutex;
-    StringMap< boost::shared_ptr<boost::mutex> >::type              m_camMutexes;
+    void DoStartCalibration ();
+    void DoAbortCalibration ();
+    void SetCalibrationState ( CalibrationState const& iNewState );
 
-    boost::thread_group                                             m_workers;
-    StringMap< boost::thread* >::type                               m_threads;
+private:
+    boost::shared_mutex                             m_mutex;
+    boost::shared_mutex                             m_stateMutex;
+    CalibrationState                                m_calibState;
+    boost::thread*                                  m_calibThread;
+    std::queue< cv::Mat >                           m_frameQueue;
+    std::vector< cv::Mat >                          m_frameList;
+    std::vector< std::vector<cv::Point2f> >         m_corners;
 
-    unsigned int                                                    m_frameDelay;
-    unsigned int                                                    m_frameCount;
-    unsigned int                                                    m_calibratedCameras;
+    PCCoreCamera*                                   m_camera;
 
-    CalibrationState                                                m_state;
-    StringMap< PCCoreCamera >::type                                 m_cameras;
-    StringMap< std::queue< PCCoreFrame > >::type                    m_frames;
-    StringMap< std::vector< std::vector <cv::Point2f> > >::type     m_chessboardCorners;
+    unsigned int                                    m_count;
+    unsigned int                                    m_fuckupCount;
+    std::vector<CallbackFn>                         m_listeners;
 };

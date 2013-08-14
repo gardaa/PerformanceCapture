@@ -24,12 +24,7 @@
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrame.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrameObserver.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreErrChk.h" />
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreStereoCameraPair.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreStereoCameraPair.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreSystem.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCommon.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreExport.h" />
@@ -38,12 +33,7 @@
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCalibrationHelper.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCamera.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreFrame.cpp" />
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreStereoCameraPair.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreStereoCameraPair.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreSystem.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreFrameObserver.cpp" />
   </ItemGroup>

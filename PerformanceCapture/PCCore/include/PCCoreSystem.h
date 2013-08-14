@@ -2,6 +2,9 @@
 #define PCCORESYSTEM_H
 
 #include "PCCoreExport.h"
+#include "PCCoreFrame.h"
+#include "PCCoreCamera.h"
+#include "PCCoreStereoCameraPair.h"
 
 #include <unordered_map>
 #include <map>
@@ -12,8 +15,8 @@
 
 using namespace AVT::VmbAPI;
 
-#include "PCCoreFrame.h"
-#include "PCCoreCamera.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace boost {
     class mutex;
@@ -38,9 +41,9 @@ public:
     PCCORE_EXPORT void EndCapture ();
     PCCORE_EXPORT unsigned int GetNumFrames ();
     PCCORE_EXPORT std::vector<std::string> GetCameraList ();
-    PCCORE_EXPORT PCCoreFrame const& GetFrameFromCamera ( std::string const& iCameraId );
+    PCCORE_EXPORT PCCoreFramePtr const GetFrameFromCamera ( std::string const& iCameraId );
     PCCORE_EXPORT std::string GetCameraStatus ( std::string const& iCameraId );
-
+    PCCORE_EXPORT double GetCameraCalibrationProgress ( std::string const& iCameraId );
     PCCORE_EXPORT void CameraListChanged ( CameraPtr iCamera, UpdateTriggerType iUpdateReason );
     
     PCCORE_EXPORT int GetMaxPerCameraBandwidth ();
@@ -51,10 +54,6 @@ public:
     PCCORE_EXPORT void CalibrateCameras ();
 
     void SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame );
-
-//public:
-//    PCCORE_EXPORT void ScheduleRegisterCameraById ( std::string const& iCameraId );
-//    PCCORE_EXPORT void ScheduleUnregisterCameraById ( std::string const& iCameraId );
 
 private:
     void RegisterCamera ( std::string const& iCameraId, CameraPtr const& iCamera );
@@ -68,11 +67,10 @@ private:
     std::queue<std::string>                             m_removeQueue;
     std::queue<CameraPtr>                               m_addQueue;
 
-    std::map<std::string, PCCoreCamera>       m_activeCameras;
-    std::map<std::string, PCCoreFrame>        m_frames;
+    std::map<std::string, PCCoreCameraPtr>              m_activeCameras;
+    std::map<std::string, PCCoreFramePtr>               m_frames;
 
-    unsigned int    m_frameCount;
-    unsigned int    m_lastCalibrationFrame;
+    std::vector<PCCoreStereoCameraPairPtr>              m_stereo;
 };
 
 #endif // PCCORESYSTEM_H

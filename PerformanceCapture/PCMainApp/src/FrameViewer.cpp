@@ -1,14 +1,15 @@
 #include "PCCoreErrChk.h"
 #include "FrameViewer.h"
 #include "PCCoreSystem.h"
-#include "PCCoreFrame.h"
 #include "ParameterHandler.h"
 
 #include <gl/GL.h>
 #include <gl/GLU.h>
+#include <GL/freeglut.h>
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 #include <QTimer>
 
@@ -61,6 +62,9 @@ void FrameViewer::initializeGL ()
     glEnable (GL_DEPTH_TEST);
     glDepthFunc (GL_LEQUAL);
     glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+    int x = 0;
+    glutInit ( &x, NULL );
 }
 void FrameViewer::resizeGL ( int w, int h )
 {
@@ -81,13 +85,14 @@ void FrameViewer::paintGL ()
         const int r = f / m_nCols;
         const int c = f % m_nCols;
 
+        float progress = cs.GetCameraCalibrationProgress ( cameras[f] );
         std::string const& status = cs.GetCameraStatus ( cameras[f] );
-        PCCoreFrame const& frame = cs.GetFrameFromCamera ( cameras[f] );
+        PCCoreFramePtr const frame = cs.GetFrameFromCamera ( cameras[f] );
 
         //std::cout << "Camera " << cameras[f] << ": " << status << std::endl;
         
         glBindTexture (GL_TEXTURE_2D, m_textures[f]);
-        DrawFrame ( r, c, frame, status );
+        DrawFrame ( r, c, frame, status, (progress < 100.0f)?progress:-1.0f);
     }
     //DrawFrame ( 0, 0, frames[0] );
     //DrawFrame ( 0, 1, frames[1] );
@@ -106,18 +111,18 @@ void FrameViewer::calibrateCameras ()
     cs.CalibrateCameras ();
 }
 
-void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFrame const& frame, std::string const& cameraStatus )
+void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFramePtr const& frame, std::string const& cameraStatus, float const& progress )
 {
     int vpw = m_width  / m_nCols;
     int vph = m_height / m_nRows;
     int vpx = col * vpw;
     int vpy = m_height - (row+1) * vph;
     
-    unsigned int fWidth = frame.Width ();
-    unsigned int fHeight = frame.Height ();
+    unsigned int fWidth = frame->Width ();
+    unsigned int fHeight = frame->Height ();
     unsigned int numChannels;
     unsigned char const* frameData;
-    frame.GetData ( frameData, numChannels );
+    frame->GetData ( frameData, numChannels );
 
     GLint glPixelFormat;
     switch (numChannels) {
@@ -181,11 +186,9 @@ void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFrame const&
         
         glTexCoord2f ( 1.0f, 1.0f );
         glVertex2f ( right, bottom );
-
     glEnd ();
     
     glDisable ( GL_TEXTURE_2D );
-
 
     float sWid = 0.01f * rWid;
     float sHei = 0.01f * rWid;
@@ -212,6 +215,29 @@ void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFrame const&
         glVertex2f ( left, bottom );
         glVertex2f ( right, bottom );
     glEnd ();
+
+
+    
+    //GLfloat invMat[] = {
+    //    1.0f,  0.0f, 0.0f, 0.0f,
+    //    0.0f, -1.0f, 0.0f, 0.0f,
+    //    0.0f,  0.0f, 1.0f, 0.0f,
+    //    0.0f,  0.0f, 0.0f, 1.0f
+    //};
+    //glMultMatrixf (invMat);
+    glLoadIdentity ();
+    //glViewport ( vpx, vpy, vpw, vph );
+    glScalef ( 0.25f, 0.25f, 1.f );
+    glOrtho ( 0.0, (GLdouble)vpw, 0.0, (GLdouble)vph, -1.0, 1.0 );
+    
+    if ( progress >= 0 ) {
+        std::stringstream ss;
+        ss << std::setw (3) << (unsigned int)(progress * 100) << "%";
+        glColor3f ( 1.0f, 1.0f, 0.0f );
+        glRasterPos2f ( 0.0f, 0.0f );
+        glLineWidth ( 3.0f );
+        glutStrokeString ( GLUT_STROKE_MONO_ROMAN, (const unsigned char*)ss.str ().c_str () );
+    }
     glEnable ( GL_TEXTURE_2D );
 
     glPopMatrix ();

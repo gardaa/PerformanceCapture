@@ -26,8 +26,7 @@ PCCoreSystem::PCCoreSystem()
     ,   m_activeCameras ()
     ,   m_mutex ( new boost::mutex () )
     ,   m_frames ()
-    ,   m_frameCount ( 0 )
-    ,   m_lastCalibrationFrame ( 0 )
+    ,   m_stereo ()
 {}
 
 void PCCoreSystem::Setup ()
@@ -110,10 +109,13 @@ PCCoreSystem::~PCCoreSystem ()
 {
     PCC_OBJ_FREE ( m_mutex );
 
-    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
-    if ( calib.CurrentState () == PCCoreCalibrationHelper::ACQUIRING || 
-        calib.CurrentState () == PCCoreCalibrationHelper::CALIBRATING ) {
-        calib.AbortCalibration ();
+    //PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
+    //if ( calib.CurrentState () == PCCoreCalibrationHelper::ACQUIRING || 
+    //    calib.CurrentState () == PCCoreCalibrationHelper::CALIBRATING ) {
+    //    calib.AbortCalibration ();
+    //}
+    for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
+        camera->second->AbortCalibration ();
     }
 }
 
@@ -133,7 +135,6 @@ PCCoreSystem& PCCoreSystem::GetInstance ()
 }
 void PCCoreSystem::DestroyInstance ()
 {
-    sm_pInstance.~shared_ptr();
     sm_pInstance.reset ( (PCCoreSystem*)0x0 );
 }
 
@@ -164,12 +165,13 @@ void PCCoreSystem::StartCapture ()
     //    err = acquisitionStartCmd->RunCommand ();
     //    ERR_CHK ( err, VmbErrorSuccess, "Error starting acquisition" );
     //}
-    //boost::lock_guard<boost::mutex> lock (*m_mutex);
+    boost::lock_guard<boost::mutex> lock (*m_mutex);
 
-    //for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
-    //    camera->second.Setup ();
-    //    camera->second.StartAcquisition ();
-    //}
+    for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
+        if ( !camera->second->IsAcquiring () ) {
+            camera->second->StartAcquisition ();
+        }
+    }
 }
 
 void PCCoreSystem::EndCapture ()
@@ -187,24 +189,31 @@ void PCCoreSystem::EndCapture ()
     //    //err = camera->GetFeatureByName( "AcquisitionEnd", acquisitionEndCmd );
     //    //err = acquisitionEndCmd->RunCommand ();
     //}
-    //boost::lock_guard<boost::mutex> lock (*m_mutex);
-    //
-    //for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
-    //    camera->second.StopAcquisition ();
-    //}
+    boost::lock_guard<boost::mutex> lock (*m_mutex);
+    
+    for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
+        if ( camera->second->IsAcquiring () ) {
+            camera->second->StopAcquisition ();
+        }
+    }
 }
 
 unsigned int PCCoreSystem::GetNumFrames ()
 {
     return m_frames.size ();
 }
-PCCoreFrame const& PCCoreSystem::GetFrameFromCamera ( std::string const& iCameraId )
+PCCoreFramePtr const PCCoreSystem::GetFrameFromCamera ( std::string const& iCameraId )
 {
-    return m_frames.at(iCameraId);
+    return m_frames.at ( iCameraId );
 }
 std::string PCCoreSystem::GetCameraStatus ( std::string const& iCameraId )
 {
-    return m_activeCameras.at(iCameraId).GetPtpStatus ();
+    return m_activeCameras.at ( iCameraId )->GetPtpStatus ();
+}
+
+double PCCoreSystem::GetCameraCalibrationProgress ( std::string const& iCameraId )
+{
+    return m_activeCameras.at ( iCameraId )->GetCalibrationProgress ();
 }
 
 void PCCoreSystem::SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame )
@@ -226,7 +235,12 @@ void PCCoreSystem::SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame )
     std::string sCamId;
     iCamera->GetID ( sCamId );
     
-    m_frames[sCamId].Reset ( width, height, 1, frameData );
+    m_frames[sCamId]->Reset ( width, height, 1, frameData );
+    
+    //PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
+    if ( m_activeCameras.at ( sCamId )->GetCalibrationState () == ACQUIRING ) {
+        m_activeCameras.at ( sCamId )->TryPushFrame ( m_frames.at ( sCamId ) );
+    }
     //memcpy ( m_data[uiCamId].data, frameData, width * height * sizeof ( unsigned char ) );
 
     //cv::Mat inImg ( height, width, CV_8UC1, frameData );
@@ -255,16 +269,13 @@ void PCCoreSystem::UnregisterCamera ( std::string const& iCameraId )
     if ( m_activeCameras.find ( iCameraId ) == m_activeCameras.end () ) {
         return;
     }
-    PCCoreCamera& cam = m_activeCameras.at ( iCameraId );
+    PCCoreCameraPtr camera = m_activeCameras.at ( iCameraId );
+    camera->StopAcquisition ();
 
-    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
-    calib.UnregisterCamera ( cam );
-
-    cam.StopAcquisition ();
     m_activeCameras.erase ( iCameraId );
     m_frames.erase ( iCameraId );
     for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
-        cam->second.AdjustBandwidth ( GetMaxPerCameraBandwidth () );
+        cam->second->AdjustBandwidth ( GetMaxPerCameraBandwidth () );
     }
 }
 void PCCoreSystem::RegisterCamera ( std::string const& iCameraId, CameraPtr const& iCamera )
@@ -272,18 +283,21 @@ void PCCoreSystem::RegisterCamera ( std::string const& iCameraId, CameraPtr cons
     if ( m_activeCameras.find ( iCameraId ) != m_activeCameras.end () ) {
         return;
     }
-    auto cam = std::make_pair ( iCameraId, PCCoreCamera ( iCamera ) );
-    m_activeCameras.insert ( cam );
-    m_frames.insert ( std::make_pair ( iCameraId, PCCoreFrame () ) );
+    auto newCam = std::make_pair ( iCameraId, PCCoreCameraPtr ( new PCCoreCamera ( iCamera ) ) );
+    auto lastCam = m_activeCameras.rbegin ();
 
-    cam.second.Setup ();
-    for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
-        cam->second.AdjustBandwidth ( GetMaxPerCameraBandwidth () );
+    m_activeCameras.insert ( newCam );
+    m_frames.insert ( std::make_pair ( iCameraId, PCCoreFramePtr ( new PCCoreFrame () ) ) );
+
+    if ( m_activeCameras.size () && !(m_activeCameras.size () % 2) ) {
+        m_stereo.push_back ( PCCoreStereoCameraPairPtr ( new PCCoreStereoCameraPair ( lastCam->second, newCam.second ) ) );
     }
-    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
-    calib.RegisterCamera ( cam.second );
 
-    cam.second.StartAcquisition ();
+    newCam.second->Setup ();
+    for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
+        cam->second->AdjustBandwidth ( GetMaxPerCameraBandwidth () );
+    }
+    newCam.second->StartAcquisition ();
 }
 
 void PCCoreSystem::CameraListChanged ( CameraPtr iCamera, UpdateTriggerType iUpdateReason )
@@ -353,7 +367,7 @@ void PCCoreSystem::UpdateCameras ()
         hasChanged = true;
     }
 
-    static bool printed = true;
+    /*static bool printed = true;
     PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance();
     if ( calib.CurrentState() == PCCoreCalibrationHelper::ACQUIRING ) {
         m_frameCount++;
@@ -371,7 +385,7 @@ void PCCoreSystem::UpdateCameras ()
             std::cout << camera->second.DistCoeffs () << std::endl;
         }
         printed = true;
-    }
+    }*/
 
     if ( hasChanged ) {
         //SynchroniseCameras ();
@@ -381,22 +395,25 @@ void PCCoreSystem::UpdateCameras ()
 void PCCoreSystem::SynchroniseCameras ()
 {
     for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
-        cam->second.StopAcquisition ();
+        cam->second->StopAcquisition ();
     }
 
     boost::thread_group syncThreads;
     for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
-        syncThreads.create_thread ( boost::bind ( &PCCoreCamera::Synchronise, &(cam->second) ) );
+        syncThreads.create_thread ( boost::bind ( &PCCoreCamera::Synchronise, &(*(cam->second)) ) );
     }
     syncThreads.join_all ();
         
     for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
-        cam->second.StartAcquisition ();
+        cam->second->StartAcquisition ();
     }
 }
 
 void PCCoreSystem::CalibrateCameras ()
 {
-    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
-    calib.StartCalibration ();
+    //PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
+    //calib.StartCalibration ();
+    for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
+        camera->second->StartCalibration ();
+    }
 }

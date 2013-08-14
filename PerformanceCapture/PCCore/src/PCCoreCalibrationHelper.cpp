@@ -1,9 +1,15 @@
 #include "PCCoreCalibrationHelper.h"
 
 #include "PCCoreCommon.h"
+#include "PCCoreCamera.h"
+#include "PCCoreSystem.h"
 
 #include <opencv2/highgui/highgui.hpp>
 
+// ----------------------------------------------------------------------
+// Chessboard
+// ----------------------------------------------------------------------
+// Public
 Chessboard::Chessboard (
     unsigned int const&     iRows,
     unsigned int const&     iCols,
@@ -18,238 +24,196 @@ Chessboard::Chessboard (
         }   
     }
 }
-std::vector< std::vector< cv::Point3f > > CreateInputArray (
-    Chessboard const&   iChessboard,
+std::vector< std::vector< cv::Point3f > > Chessboard::CreateInputArray (
     unsigned int        iFrameCount
 ) {
     std::vector< std::vector< cv::Point3f > > srcArray;
 
     while ( iFrameCount-- ) {
-        srcArray.push_back ( iChessboard.GetPoints () );
+        srcArray.push_back ( GetPoints () );
     }
 
     return srcArray;
 }
 
+// ----------------------------------------------------------------------
+// PCCoreCalibrationHelper
+// ----------------------------------------------------------------------
+// Private static
 Chessboard PCCoreCalibrationHelper::sm_chessboard ( 7u, 10u, 10u );
-PCCoreCalibrationHelper* PCCoreCalibrationHelper::sm_pInstance = (PCCoreCalibrationHelper*)0x0;
+PCCoreCalibrationHelper* PCCoreCalibrationHelper::sm_pInstance;
 
-PCCoreCalibrationHelper::PCCoreCalibrationHelper ()
-    :   m_frameDelay ( 150 )
-    ,   m_frameCount ( 15 )
-    ,   m_calibratedCameras ( 0 )
-    ,   m_state ( UNKNOWN )
-    ,   m_cameras ()
-    ,   m_frames ()
-    ,   m_chessboardCorners ()
+// Public static
+PCCoreCalibrationHelper& PCCoreCalibrationHelper::GetInstance ()
 {
-    Reset ();
-}
-
-PCCoreCalibrationHelper::~PCCoreCalibrationHelper ()
-{}
-
-PCCoreCalibrationHelper& PCCoreCalibrationHelper::GetInstance () {
-    if ( sm_pInstance == (PCCoreCalibrationHelper*)0x0 ) {
+    if ( !sm_pInstance ) {
         sm_pInstance = new PCCoreCalibrationHelper ();
     }
     return (*sm_pInstance);
 }
-void PCCoreCalibrationHelper::DestroyInstance () {
+void PCCoreCalibrationHelper::DestroyInstance ()
+{
     PCC_OBJ_FREE ( sm_pInstance );
 }
 
-void PCCoreCalibrationHelper::StartCalibration ()
+// Public
+PCCoreCalibrationHelper::~PCCoreCalibrationHelper ()
+{}
+std::vector< std::vector< cv::Point3f > > PCCoreCalibrationHelper::GetChessboardPoints ()
 {
-    // Writer access to global maps.
+    return sm_chessboard.CreateInputArray ( m_frameCount );
+}
+
+// Private
+PCCoreCalibrationHelper::PCCoreCalibrationHelper ()
+    :   m_frameDelay ( 1000 )
+    ,   m_frameCount ( 15 )
+{}
+
+
+// ----------------------------------------------------------------------
+// PCCoreCameraCalibration
+// ----------------------------------------------------------------------
+// Public
+PCCoreCameraCalibration::PCCoreCameraCalibration ( PCCoreCamera* iParent )
+    :   m_mutex ()
+    ,   m_stateMutex ()
+    ,   m_calibState ( UNKNOWN )
+    ,   m_calibThread ( (boost::thread*) 0x0 )
+    ,   m_frameQueue ()
+    ,   m_frameList ()
+    ,   m_corners ()
+    ,   m_camera ( iParent )
+    ,   m_count ( 0u )
+    ,   m_fuckupCount ( 0u )
+{}
+PCCoreCameraCalibration::~PCCoreCameraCalibration ()
+{
     boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock ( upgradedLock );
+    boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
 
-    Reset ();
-    m_state = ACQUIRING;
-
-    for ( auto camera = m_cameras.begin (); camera != m_cameras.end (); camera++ ) {
-        boost::thread* thread = m_workers.create_thread ( boost::bind ( &PCCoreCalibrationHelper::ProcessCalibration, this, camera->first ) );
-        
-        //boost::thread* thread = new boost::thread ( boost::bind ( &PCCoreCalibrationHelper::ProcessCalibration, this, camera->first ) );
-        //boost::thread::attributes a;
-#ifdef WIN32
-        SetThreadPriority ( thread->native_handle (), THREAD_PRIORITY_LOWEST );
-#endif
-        //thread->start_thread_noexcept ( a );
-
-        //m_threads.insert ( std::make_pair ( camera->first, (boost::thread*)NULL ) );
-        m_threads.insert ( std::make_pair ( camera->first, thread ) );
+    if ( m_calibThread ) {
+        m_calibThread->interrupt ();
     }
+    PCC_OBJ_FREE ( m_calibThread );
 }
-void PCCoreCalibrationHelper::AbortCalibration ()
+void PCCoreCameraCalibration::StartCalibration ()
 {
-    // Writer access to global maps.
     boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock ( upgradedLock );
+    boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
 
-    Reset ();
-    m_state = UNKNOWN;
-    m_workers.join_all ();
+    DoStartCalibration ();
 }
-
-void PCCoreCalibrationHelper::Reset ()
+void PCCoreCameraCalibration::AbortCalibration ()
 {
-    m_calibratedCameras = 0;
-    auto frames = m_frames.begin (); 
-    auto corners = m_chessboardCorners.begin ();
-
-    std::queue < PCCoreFrame > emptyQueue;
-    for ( ; frames != m_frames.end (); frames++, corners++ ) {
-        frames->second.swap ( emptyQueue );
-        corners->second.clear ();
+    if ( m_calibState == CALIBRATING || m_calibState == ACQUIRING ) {
+        DoAbortCalibration ();
     }
 }
-
-bool PCCoreCalibrationHelper::RegisterCamera ( PCCoreCamera const& iCamera )
+void PCCoreCameraCalibration::Process ()
 {
-    // Writer access to global maps.
-    boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock ( upgradedLock );
-    
-    std::string const& camId = iCamera.GetID ();
-    if ( m_cameras.find ( camId ) == m_cameras.end () ) {
-        m_cameras.insert ( std::make_pair ( camId, iCamera ) );
+    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
 
-        std::queue< PCCoreFrame > frames;
-        m_frames.insert ( std::make_pair ( camId, frames ) );
-
-        std::vector< std::vector< cv::Point2f > > corners;
-        m_chessboardCorners.insert ( std::make_pair ( camId, corners ) );
-
-        boost::shared_ptr<boost::mutex> mutex ( new boost::mutex () );
-        m_camMutexes.insert ( std::make_pair ( camId, mutex ) );
-        
-        std::cout << camId << " registered to calibration module." << std::endl;
-
-        return true;
-    }
-    return false;
-}
-
-bool PCCoreCalibrationHelper::UnregisterCamera ( PCCoreCamera const& iCamera )
-{
-    // Writer access to global maps.
-    boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock ( upgradedLock );
-
-    std::string const& camId = iCamera.GetID ();
-    if ( m_cameras.find ( camId ) != m_cameras.end () ) {
-        // Writer access to individual camera lists.
-        boost::shared_ptr<boost::mutex> camMutex = m_camMutexes.at ( camId );
-        boost::lock_guard<boost::mutex> lock ( *camMutex );
-        
-        m_cameras.erase ( camId );
-        m_frames.erase ( camId );
-        m_chessboardCorners.erase ( camId );
-
-        m_camMutexes.erase ( camId );
-
-        m_workers.remove_thread ( m_threads.at ( camId ) );
-        m_threads.erase ( camId );
-
-        std::cout << camId << " unregistered from calibration module." << std::endl;
-
-        return true;
-    }
-    return false;
-}
-
-bool PCCoreCalibrationHelper::RegisterFrame ( std::string const& iCameraId, PCCoreFrame const& iFrame )
-{
-    // Reader lock to global maps.
-    boost::shared_lock<boost::shared_mutex> sharedLock ( m_mutex );
-    
-    // Writer lock to frame queue.
-    boost::shared_ptr<boost::mutex> camMutex = m_camMutexes.at ( iCameraId );
-    boost::lock_guard<boost::mutex> lock ( *camMutex );
-
-    if ( m_frames.find ( iCameraId ) != m_frames.end () ) {        
-        m_frames.at ( iCameraId ).push ( iFrame );
-
-        return true;
-    }
-    return false;
-}
-
-void PCCoreCalibrationHelper::ProcessCalibration (
-    std::string     iCamId
-) {
-    boost::shared_ptr<boost::mutex> camMutex = m_camMutexes.at ( iCamId );
+    cv::Size const& size = calib.GetChessboardSize ();
+    m_count = 0;
     do {
-        // Reader lock to global maps.
-        boost::shared_lock<boost::shared_mutex> mapLock ( m_mutex );
+        boost::this_thread::sleep_for ( boost::chrono::milliseconds ( calib.FrameDelay () ) );
+        //boost::this_thread::interruption_point ();
 
-        if ( m_state != ACQUIRING ) {
-            break;
-        }
-        
-        // Writer lock to individual camera data.
-        boost::unique_lock<boost::mutex> camLock ( *camMutex );
+        cv::Mat frame;
+        {
+            boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
+            boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
 
-        std::queue< PCCoreFrame >& frameQueue = m_frames.at ( iCamId );
-        if ( frameQueue.empty () ) {
-            continue;
-        }
-        PCCoreFrame frame = frameQueue.front ();
-        frameQueue.pop ();
-
-        mapLock.unlock ();
-        camLock.unlock ();
-                
-        mapLock.lock ();
-        std::vector< std::vector < cv::Point2f > >& detectedCorners = m_chessboardCorners.at ( iCamId );
-        if ( detectedCorners.size () == m_frameCount ) {
-            m_calibratedCameras++;
-            if ( m_cameras.size () == m_calibratedCameras ) {
-                m_state = CALIBRATING;
-                for ( auto camera = m_cameras.begin (); camera != m_cameras.end (); camera++ ) {
-                    camera->second.Calibrate (
-                        CreateInputArray ( sm_chessboard, m_frameCount ),
-                        detectedCorners,
-                        cv::Size ( frame.Width (), frame.Height () )
-                    );
-                }
-                m_state = CALIBRATED;
+            if ( !m_frameQueue.empty () ) {
+                frame = m_frameQueue.front ();
+                m_frameQueue.pop ();
+            } else {
+                continue;
             }
-            mapLock.unlock ();
-            break;
         }
-        mapLock.unlock ();
 
-        std::vector< cv::Point2f > corners;
-        bool foundCorners = cv::findChessboardCorners ( frame.GetImagePoints(), sm_chessboard.GetSize (), corners );
-        if ( foundCorners ) {
-            mapLock.lock ();
-            std::cout << iCamId << " Found one!" << std::endl;
+        std::vector<cv::Point2f> corners;
+        if ( cv::findChessboardCorners ( frame, size, corners, cv::CALIB_CB_FAST_CHECK ) ) {
+            m_frameList.push_back ( frame.clone () );
+            m_corners.push_back ( corners );
 
-            if ( m_cameras.find ( iCamId ) == m_cameras.end () ) {
-                return;
+            std::stringstream sFrame;
+            sFrame << ".\\Calibration\\" << m_camera->GetID () <<  "\\";
+
+            sFrame << m_count++ << ".png";
+            cv::drawChessboardCorners ( frame, size, corners, true );
+            cv::imwrite ( sFrame.str (), frame );
+
+            if ( calib.FrameCount () == m_count ) {
+                SetCalibrationState ( CALIBRATING );
             }
-            
-            //std::stringstream windowName;
-            //windowName << iCamId << " - " << detectedCorners.size ();
-
-            //cv::namedWindow ( windowName.str () );
-            //cv::drawChessboardCorners ( frame.GetImagePoints (), cv::Size ( ), corners, foundCorners );
-            //cv::imshow ( windowName.str (), frame.GetImagePoints () );
-
-            std::vector< std::vector < cv::Point2f > >& detectedCorners = m_chessboardCorners.at ( iCamId );
-            if ( detectedCorners.size () < m_frameCount ) {
-                detectedCorners.push_back ( corners );
-                std::cout << iCamId << ": " << detectedCorners.size () << " / " << m_frameCount << std::endl;
-            }
-            mapLock.unlock ();
         }
-    } while ( 1 );
+    } while ( m_calibState == ACQUIRING );
 
-    std::cout << "Calibrated " << iCamId << std::endl;
-    if ( m_state == CALIBRATED ) {
-        Reset ();
+    m_camera->DoCalibration ( calib.GetChessboardPoints (), m_corners, m_camera->GetFrameSize () );
+    {
+        boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
+        boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+
+        SetCalibrationState ( CALIBRATED );
+        m_listeners.clear ();
+
+        std::cout   << m_camera->CameraMatrix ()    << std::endl 
+                    << m_camera->DistCoeffs ()      << std::endl;
+    }
+}
+void PCCoreCameraCalibration::PushFrame ( PCCoreFramePtr const& iFrame )
+{
+    boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
+    boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+
+    m_frameQueue.push ( iFrame->GetImagePoints ().clone () );
+}
+CalibrationState PCCoreCameraCalibration::GetCalibrationState ()
+{
+    //boost::shared_lock<boost::shared_mutex> lock ( m_stateMutex );
+
+    return m_calibState;
+}
+double PCCoreCameraCalibration::GetCalibrationProgress () const
+{
+    return ( (double)m_frameList.size () / (double)PCCoreCalibrationHelper::GetInstance ().FrameCount () );
+}
+
+// Private
+void PCCoreCameraCalibration::DoStartCalibration ()
+{
+    if ( m_calibState == CALIBRATING || m_calibState == ACQUIRING ) {
+        DoAbortCalibration ();
+    }
+
+    SetCalibrationState ( ACQUIRING );
+    m_calibThread = new boost::thread ( boost::bind ( &PCCoreCameraCalibration::Process, this ) );
+}
+void PCCoreCameraCalibration::DoAbortCalibration ()
+{
+    SetCalibrationState ( UNKNOWN );
+
+    PCC_OBJ_FREE ( m_calibThread );
+
+    std::queue<cv::Mat> ().swap ( m_frameQueue );
+    std::vector<cv::Mat> ().swap ( m_frameList );
+    std::vector< std::vector<cv::Point2f> >().swap ( m_corners );
+}
+void PCCoreCameraCalibration::SetCalibrationState ( CalibrationState const& iNewState )
+{
+    CalibrationState oldState;
+    {
+        //boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
+        //boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+
+        oldState = m_calibState;
+        m_calibState = iNewState;
+    }
+
+    for ( auto listener = m_listeners.begin (); listener != m_listeners.end (); listener++ ) {
+        listener->operator()( m_camera, oldState, iNewState );
     }
 }

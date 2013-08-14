@@ -6,59 +6,66 @@
 #include "PCCoreCamera.h"
 #include "PCCoreSystem.h"
 
+#include <boost/log/trivial.hpp>
+
 #include <opencv2/calib3d/calib3d.hpp>
 
-ChessboardDescriptor PCCoreStereoCameraPair::sm_chessboard ( 8u, 11u, 10u );
-
-PCCoreStereoCameraPair::PCCoreStereoCameraPair ()
-    :   m_refCount ( new unsigned int ( 1u ) )
-    ,   m_left ( 0x0 )
-    ,   m_right ( 0x0 )
-    ,   m_stereoRotation    ( new cv::Mat () )
-    ,   m_stereoTranslation ( new cv::Mat () )
-    ,   m_stereoEssential   ( new cv::Mat () )
-    ,   m_stereoFundamental ( new cv::Mat () )
-{}
-
+PCCoreStereoCameraPair::PCCoreStereoCameraPair (
+    PCCoreCameraPtr         iLeft,
+    PCCoreCameraPtr         iRight
+)   :   m_left ()
+    ,   m_right ()
+    ,   m_stereoRotation ()
+    ,   m_stereoTranslation ()
+    ,   m_stereoEssential ()
+    ,   m_stereoFundamental ()
+{
+    SetLeft ( iLeft );
+    SetRight ( iRight );
+}
 
 PCCoreStereoCameraPair::~PCCoreStereoCameraPair ()
+{}
+
+void PCCoreStereoCameraPair::OnCameraCalibrated ( PCCoreCamera* iCamera, CalibrationState iOldState, CalibrationState iNewState )
 {
-    if ( m_refCount && --(*m_refCount) ) {
-        PCC_OBJ_FREE (m_refCount);
-        PCC_OBJ_FREE (m_left);
-        PCC_OBJ_FREE (m_right);
-        PCC_OBJ_FREE (m_stereoRotation);
-        PCC_OBJ_FREE (m_stereoTranslation);
-        PCC_OBJ_FREE (m_stereoEssential);
-        PCC_OBJ_FREE (m_stereoFundamental);
+    std::string const& camId = iCamera->GetID ();
+    if ( iNewState == CALIBRATED && camId.compare ( m_left->GetID () ) == 0 ) {
+        if ( m_right.get () != 0x0 && m_right->GetCalibrationState () == CALIBRATED ) {
+            Calibrate ();
+        }
+    } else if ( iNewState == CALIBRATED && camId.compare ( m_right->GetID () ) == 0 ) {
+        if ( m_left.get () != 0x0 && m_left->GetCalibrationState () == CALIBRATED ) {
+            Calibrate ();
+        }
     }
 }
 
 void PCCoreStereoCameraPair::Calibrate ()
 {
-    //PCCoreSystem& cs = PCCoreSystem::GetInstance ();
-    //PCCoreFrame const& leftFrame = cs.GetFrameFromCamera ( m_left->GetID() );
-    //PCCoreFrame const& rightFrame = cs.GetFrameFromCamera ( m_right->GetID() );
+    cv::stereoCalibrate (
+        PCCoreCalibrationHelper::GetInstance ().GetChessboardPoints (),
+        m_left->GetChessboardCorners (),
+        m_right->GetChessboardCorners (),
+        m_left->CameraMatrix (),
+        m_left->DistCoeffs (),
+        m_right->CameraMatrix (),
+        m_right->DistCoeffs (),
+        m_left->GetFrameSize (),
+        m_stereoRotation,
+        m_stereoTranslation,
+        m_stereoEssential,
+        m_stereoFundamental
+    );
 
-    //std::vector< cv::Point3f > chessboardPoints;
-    //for ( unsigned int i = 0; i < sm_chessboard.rows; i++ ) {
-    //    for ( unsigned int j = 0; j < sm_chessboard.cols; j++ ) {
-    //        chessboardPoints.push_back ( cv::Point3f ( i * sm_chessboard.squareSize, j * sm_chessboard.squareSize, 0.0f ) );
-    //    }   
-    //}
+    BOOST_LOG_TRIVIAL (trace) << std::endl << "Rstereo: " << std::endl << m_stereoRotation << std::endl;
+    BOOST_LOG_TRIVIAL (trace) << std::endl << "Tstereo: " << std::endl << m_stereoTranslation << std::endl;
+    BOOST_LOG_TRIVIAL (trace) << std::endl << "Estereo: " << std::endl << m_stereoEssential << std::endl;
+    BOOST_LOG_TRIVIAL (trace) << std::endl << "Fstereo: " << std::endl << m_stereoFundamental << std::endl;
 
-    //cv::stereoCalibrate (
-    //    chessboardPoints,
-    //    leftFrame.GetImagePoints (),
-    //    rightFrame.GetImagePoints (),
-    //    m_left->CameraMatrix (),
-    //    m_left->DistCoeffs (),
-    //    m_right->CameraMatrix (),
-    //    m_right->DistCoeffs (),
-    //    cv::Size ( leftFrame.Width (), leftFrame.Height () ),
-    //    *m_stereoRotation,
-    //    *m_stereoTranslation,
-    //    *m_stereoEssential,
-    //    *m_stereoFundamental
-    //);
+    m_left->StopAcquisition ();
+    m_left->StartAcquisition ();
+
+    m_right->StopAcquisition ();
+    m_right->StartAcquisition ();
 }

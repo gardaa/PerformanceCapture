@@ -5,9 +5,9 @@
 #include <VimbaCPP/Include/VimbaCPP.h>
 #include <opencv2/opencv.hpp>
 
-using namespace AVT::VmbAPI;
+#include "PCCoreFrame.h"
 
-class PCCoreFrame;
+using namespace AVT::VmbAPI;
 class QTimer;
 
 class FrameViewer : public QGLWidget
@@ -28,7 +28,7 @@ public slots:
     void calibrateCameras ();
     
 private:
-    void DrawFrame ( int const& row, int const& col, PCCoreFrame const& frame, std::string const& cameraStatus );
+    void DrawFrame ( int const& row, int const& col, PCCoreFramePtr const& frame, std::string const& cameraStatus, float const& progress );
     void AdjustGrid ( const int& nElems );
 
 private:
