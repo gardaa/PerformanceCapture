@@ -5,7 +5,7 @@
 #include "PCCoreCommon.h"
 
 #include "CameraCalibration.h"
-#include "pcc::CalibrationHelper.h"
+#include "CalibrationHelper.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
@@ -35,7 +35,7 @@ public:
     PCCORE_EXPORT void StartCalibration ();
     PCCORE_EXPORT void AbortCalibration ();
     PCCORE_EXPORT void TryPushFrame ( PCCoreFramePtr const& iFrame );
-    PCCORE_EXPORT CalibrationState GetCalibrationState ();
+    PCCORE_EXPORT pcc::CalibrationState GetCalibrationState ();
     PCCORE_EXPORT double GetCalibrationProgress () const;
     PCCORE_EXPORT std::vector< std::vector<cv::Point2f> > const& GetChessboardCorners () const;
 
@@ -89,13 +89,13 @@ private:
     );
 
 public:
-    inline void RegisterCallback ( void (*iFunc)(PCCoreCamera*, CalibrationState, CalibrationState) )
+    inline void RegisterCallback ( void (*iFunc)(PCCoreCamera*, pcc::CalibrationState, pcc::CalibrationState) )
     {
         m_calibration->RegisterCallback ( iFunc );
     }
 
     template<typename T>
-    inline void RegisterCallback ( T* iObj, void (T::*iFunc)(PCCoreCamera*, CalibrationState, CalibrationState) )
+    inline void RegisterCallback ( T* iObj, void (T::*iFunc)(PCCoreCamera*, pcc::CalibrationState, pcc::CalibrationState) )
     {
         m_calibration->RegisterCallback ( iObj, iFunc );
     }

@@ -4,7 +4,7 @@
 #include "PCCoreCamera.h"
 #include "PCCoreFrameObserver.h"
 #include "PCCoreErrChk.h"
-#include "pcc::CalibrationHelper.h"
+#include "CalibrationHelper.h"
 
 #define BOOST_ALL_DYN_LINK
 #include <boost/thread/thread.hpp>
@@ -238,7 +238,7 @@ void PCCoreSystem::SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame )
     m_frames[sCamId]->Reset ( width, height, 1, frameData );
     
     //pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
-    if ( m_activeCameras.at ( sCamId )->GetCalibrationState () == ACQUIRING ) {
+    if ( m_activeCameras.at ( sCamId )->GetCalibrationState () == pcc::ACQUIRING ) {
         m_activeCameras.at ( sCamId )->TryPushFrame ( m_frames.at ( sCamId ) );
     }
     //memcpy ( m_data[uiCamId].data, frameData, width * height * sizeof ( unsigned char ) );

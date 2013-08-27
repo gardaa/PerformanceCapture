@@ -27,15 +27,15 @@ PCCoreStereoCameraPair::PCCoreStereoCameraPair (
 PCCoreStereoCameraPair::~PCCoreStereoCameraPair ()
 {}
 
-void PCCoreStereoCameraPair::OnCameraCalibrated ( PCCoreCamera* iCamera, CalibrationState iOldState, CalibrationState iNewState )
+void PCCoreStereoCameraPair::OnCameraCalibrated ( PCCoreCamera* iCamera, pcc::CalibrationState iOldState, pcc::CalibrationState iNewState )
 {
     std::string const& camId = iCamera->GetID ();
-    if ( iNewState == CALIBRATED && camId.compare ( m_left->GetID () ) == 0 ) {
-        if ( m_right.get () != 0x0 && m_right->GetCalibrationState () == CALIBRATED ) {
+    if ( iNewState == pcc::CALIBRATED && camId.compare ( m_left->GetID () ) == 0 ) {
+        if ( m_right.get () != 0x0 && m_right->GetCalibrationState () == pcc::CALIBRATED ) {
             Calibrate ();
         }
-    } else if ( iNewState == CALIBRATED && camId.compare ( m_right->GetID () ) == 0 ) {
-        if ( m_left.get () != 0x0 && m_left->GetCalibrationState () == CALIBRATED ) {
+    } else if ( iNewState == pcc::CALIBRATED && camId.compare ( m_right->GetID () ) == 0 ) {
+        if ( m_left.get () != 0x0 && m_left->GetCalibrationState () == pcc::CALIBRATED ) {
             Calibrate ();
         }
     }

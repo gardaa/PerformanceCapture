@@ -398,7 +398,7 @@ void PCCoreCamera::TryPushFrame ( PCCoreFramePtr const& iFrame )
         m_lastFrameCount = m_frameCount;
     }
 }
-CalibrationState PCCoreCamera::GetCalibrationState ()
+pcc::CalibrationState PCCoreCamera::GetCalibrationState ()
 {
     return m_calibration->GetCalibrationState ();
 }

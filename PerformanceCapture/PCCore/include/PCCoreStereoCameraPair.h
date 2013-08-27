@@ -5,7 +5,9 @@
 
 class PCCoreFrame;
 
+namespace pcc {
 enum CalibrationState;
+}
 
 #include "PCCoreCamera.h"
 #include <opencv2/opencv.hpp>
@@ -21,7 +23,7 @@ public:
 
     void Calibrate ();
 
-    void OnCameraCalibrated ( PCCoreCamera* iCamera, CalibrationState iOldState, CalibrationState iNewState );
+    void OnCameraCalibrated ( PCCoreCamera* iCamera, pcc::CalibrationState iOldState, pcc::CalibrationState iNewState );
 
     inline PCCoreCameraPtr const GetLeft () const { return m_left; }
     inline void SetLeft ( PCCoreCameraPtr const iNewLeft ) {
@@ -34,12 +36,12 @@ public:
         m_right->RegisterCallback ( this, &PCCoreStereoCameraPair::OnCameraCalibrated );
     }
 
-    inline CalibrationState GetCalibrationState ()
+    inline pcc::CalibrationState GetCalibrationState ()
     {
         if ( m_left->GetCalibrationState () == m_right->GetCalibrationState () ) {
             return m_left->GetCalibrationState ();
         } else {
-            return UNKNOWN;
+            return pcc::UNKNOWN;
         }
     }
 

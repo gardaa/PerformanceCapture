@@ -2,6 +2,10 @@
 
 #include "PCCoreCommon.h"
 
+#include "PCCoreCamera.h"
+#include "CalibrationHelper.h"
+#include "PCCoreSystem.h"
+
 // ----------------------------------------------------------------------
 // CameraCalibration
 // ----------------------------------------------------------------------
@@ -102,7 +106,7 @@ void pcc::CameraCalibration::PushFrame ( PCCoreFramePtr const& iFrame )
 
     m_frameQueue.push ( iFrame->GetImagePoints ().clone () );
 }
-CalibrationState pcc::CameraCalibration::GetCalibrationState ()
+pcc::CalibrationState pcc::CameraCalibration::GetCalibrationState ()
 {
     //boost::shared_lock<boost::shared_mutex> lock ( m_stateMutex );
 
