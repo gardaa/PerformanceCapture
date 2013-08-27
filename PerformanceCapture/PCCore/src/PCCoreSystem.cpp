@@ -4,7 +4,7 @@
 #include "PCCoreCamera.h"
 #include "PCCoreFrameObserver.h"
 #include "PCCoreErrChk.h"
-#include "PCCoreCalibrationHelper.h"
+#include "pcc::CalibrationHelper.h"
 
 #define BOOST_ALL_DYN_LINK
 #include <boost/thread/thread.hpp>
@@ -109,9 +109,9 @@ PCCoreSystem::~PCCoreSystem ()
 {
     PCC_OBJ_FREE ( m_mutex );
 
-    //PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
-    //if ( calib.CurrentState () == PCCoreCalibrationHelper::ACQUIRING || 
-    //    calib.CurrentState () == PCCoreCalibrationHelper::CALIBRATING ) {
+    //pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
+    //if ( calib.CurrentState () == pcc::CalibrationHelper::ACQUIRING || 
+    //    calib.CurrentState () == pcc::CalibrationHelper::CALIBRATING ) {
     //    calib.AbortCalibration ();
     //}
     for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
@@ -237,7 +237,7 @@ void PCCoreSystem::SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame )
     
     m_frames[sCamId]->Reset ( width, height, 1, frameData );
     
-    //PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
+    //pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
     if ( m_activeCameras.at ( sCamId )->GetCalibrationState () == ACQUIRING ) {
         m_activeCameras.at ( sCamId )->TryPushFrame ( m_frames.at ( sCamId ) );
     }
@@ -368,8 +368,8 @@ void PCCoreSystem::UpdateCameras ()
     }
 
     /*static bool printed = true;
-    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance();
-    if ( calib.CurrentState() == PCCoreCalibrationHelper::ACQUIRING ) {
+    pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance();
+    if ( calib.CurrentState() == pcc::CalibrationHelper::ACQUIRING ) {
         m_frameCount++;
         if ( m_frameCount >= m_lastCalibrationFrame + calib.FrameDelay () ) {
             for ( auto frame = m_frames.begin (); frame != m_frames.end (); frame++ ) {
@@ -378,7 +378,7 @@ void PCCoreSystem::UpdateCameras ()
             m_lastCalibrationFrame = m_frameCount;
         }
         printed = false;
-    } else if ( !printed && calib.CurrentState() == PCCoreCalibrationHelper::CALIBRATED ) {
+    } else if ( !printed && calib.CurrentState() == pcc::CalibrationHelper::CALIBRATED ) {
         for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
             std::cout << camera->first << ": " << std::endl;
             std::cout << camera->second.CameraMatrix () << std::endl;
@@ -411,7 +411,7 @@ void PCCoreSystem::SynchroniseCameras ()
 
 void PCCoreSystem::CalibrateCameras ()
 {
-    //PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
+    //pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
     //calib.StartCalibration ();
     for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
         camera->second->StartCalibration ();

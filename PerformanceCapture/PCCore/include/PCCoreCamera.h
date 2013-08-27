@@ -4,7 +4,8 @@
 #include "PCCoreExport.h"
 #include "PCCoreCommon.h"
 
-#include "PCCoreCalibrationHelper.h"
+#include "CameraCalibration.h"
+#include "pcc::CalibrationHelper.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
@@ -116,7 +117,7 @@ private:
 
     unsigned int                                    m_frameCount;
     unsigned int                                    m_lastFrameCount;
-    PCCoreCameraCalibration*                        m_calibration;
+    pcc::CameraCalibration*                         m_calibration;
 };
 
 typedef boost::shared_ptr<PCCoreCamera> PCCoreCameraPtr;

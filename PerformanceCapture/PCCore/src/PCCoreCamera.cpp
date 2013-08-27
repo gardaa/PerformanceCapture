@@ -24,9 +24,9 @@ PCCoreCamera::PCCoreCamera (
     ,   m_distCoeffs ( 8, 1, CV_64F )
     ,   m_frameCount ( 0u )
     ,   m_lastFrameCount ( 0u )
-    ,   m_calibration ( (PCCoreCameraCalibration*)0x0 )
+    ,   m_calibration ( (pcc::CameraCalibration*)0x0 )
 {
-    m_calibration = new PCCoreCameraCalibration ( this );
+    m_calibration = new pcc::CameraCalibration ( this );
 }
 
 PCCoreCamera::~PCCoreCamera ()
@@ -388,7 +388,7 @@ void PCCoreCamera::AbortCalibration ()
 }
 void PCCoreCamera::TryPushFrame ( PCCoreFramePtr const& iFrame )
 {
-    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
+    pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
 
     unsigned int frameDelay = calib.FrameDelay () / 16;
 

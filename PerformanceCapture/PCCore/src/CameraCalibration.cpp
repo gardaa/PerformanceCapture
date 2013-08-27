@@ -1,81 +1,12 @@
-#include "PCCoreCalibrationHelper.h"
+#include "CameraCalibration.h"
 
 #include "PCCoreCommon.h"
-#include "PCCoreCamera.h"
-#include "PCCoreSystem.h"
-
-#include <opencv2/highgui/highgui.hpp>
 
 // ----------------------------------------------------------------------
-// Chessboard
+// CameraCalibration
 // ----------------------------------------------------------------------
 // Public
-Chessboard::Chessboard (
-    unsigned int const&     iRows,
-    unsigned int const&     iCols,
-    float const&            iSquareSize
-)   :   m_size (iCols, iRows)
-    ,   m_squareSize (iSquareSize)
-    ,   m_points ()
-{
-    for ( int i = 0; i < m_size.height; i++ ) {
-        for ( int j = 0; j < m_size.width; j++ ) {
-            m_points.push_back ( cv::Point3f ( i * m_squareSize, j * m_squareSize, 0.0f ) );
-        }   
-    }
-}
-std::vector< std::vector< cv::Point3f > > Chessboard::CreateInputArray (
-    unsigned int        iFrameCount
-) {
-    std::vector< std::vector< cv::Point3f > > srcArray;
-
-    while ( iFrameCount-- ) {
-        srcArray.push_back ( GetPoints () );
-    }
-
-    return srcArray;
-}
-
-// ----------------------------------------------------------------------
-// PCCoreCalibrationHelper
-// ----------------------------------------------------------------------
-// Private static
-Chessboard PCCoreCalibrationHelper::sm_chessboard ( 7u, 10u, 10u );
-PCCoreCalibrationHelper* PCCoreCalibrationHelper::sm_pInstance;
-
-// Public static
-PCCoreCalibrationHelper& PCCoreCalibrationHelper::GetInstance ()
-{
-    if ( !sm_pInstance ) {
-        sm_pInstance = new PCCoreCalibrationHelper ();
-    }
-    return (*sm_pInstance);
-}
-void PCCoreCalibrationHelper::DestroyInstance ()
-{
-    PCC_OBJ_FREE ( sm_pInstance );
-}
-
-// Public
-PCCoreCalibrationHelper::~PCCoreCalibrationHelper ()
-{}
-std::vector< std::vector< cv::Point3f > > PCCoreCalibrationHelper::GetChessboardPoints ()
-{
-    return sm_chessboard.CreateInputArray ( m_frameCount );
-}
-
-// Private
-PCCoreCalibrationHelper::PCCoreCalibrationHelper ()
-    :   m_frameDelay ( 1000 )
-    ,   m_frameCount ( 15 )
-{}
-
-
-// ----------------------------------------------------------------------
-// PCCoreCameraCalibration
-// ----------------------------------------------------------------------
-// Public
-PCCoreCameraCalibration::PCCoreCameraCalibration ( PCCoreCamera* iParent )
+pcc::CameraCalibration::CameraCalibration ( PCCoreCamera* iParent )
     :   m_mutex ()
     ,   m_stateMutex ()
     ,   m_calibState ( UNKNOWN )
@@ -87,7 +18,7 @@ PCCoreCameraCalibration::PCCoreCameraCalibration ( PCCoreCamera* iParent )
     ,   m_count ( 0u )
     ,   m_fuckupCount ( 0u )
 {}
-PCCoreCameraCalibration::~PCCoreCameraCalibration ()
+pcc::CameraCalibration::~CameraCalibration ()
 {
     boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
     boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
@@ -97,23 +28,23 @@ PCCoreCameraCalibration::~PCCoreCameraCalibration ()
     }
     PCC_OBJ_FREE ( m_calibThread );
 }
-void PCCoreCameraCalibration::StartCalibration ()
+void pcc::CameraCalibration::StartCalibration ()
 {
     boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
     boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
 
     DoStartCalibration ();
 }
-void PCCoreCameraCalibration::AbortCalibration ()
+void pcc::CameraCalibration::AbortCalibration ()
 {
     if ( m_calibState == CALIBRATING || m_calibState == ACQUIRING ) {
         DoAbortCalibration ();
     }
 }
-void PCCoreCameraCalibration::Process ()
+void pcc::CameraCalibration::Process ()
 {
     PCCoreSystem& cs = PCCoreSystem::GetInstance ();
-    PCCoreCalibrationHelper& calib = PCCoreCalibrationHelper::GetInstance ();
+    pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
 
     cv::Size const& size = calib.GetChessboardSize ();
     m_count = 0;
@@ -164,35 +95,35 @@ void PCCoreCameraCalibration::Process ()
                     << m_camera->DistCoeffs ()      << std::endl;
     }
 }
-void PCCoreCameraCalibration::PushFrame ( PCCoreFramePtr const& iFrame )
+void pcc::CameraCalibration::PushFrame ( PCCoreFramePtr const& iFrame )
 {
     boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
     boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
 
     m_frameQueue.push ( iFrame->GetImagePoints ().clone () );
 }
-CalibrationState PCCoreCameraCalibration::GetCalibrationState ()
+CalibrationState pcc::CameraCalibration::GetCalibrationState ()
 {
     //boost::shared_lock<boost::shared_mutex> lock ( m_stateMutex );
 
     return m_calibState;
 }
-double PCCoreCameraCalibration::GetCalibrationProgress () const
+double pcc::CameraCalibration::GetCalibrationProgress () const
 {
-    return ( (double)m_frameList.size () / (double)PCCoreCalibrationHelper::GetInstance ().FrameCount () );
+    return ( (double)m_frameList.size () / (double)pcc::CalibrationHelper::GetInstance ().FrameCount () );
 }
 
 // Private
-void PCCoreCameraCalibration::DoStartCalibration ()
+void pcc::CameraCalibration::DoStartCalibration ()
 {
     if ( m_calibState == CALIBRATING || m_calibState == ACQUIRING ) {
         DoAbortCalibration ();
     }
 
     SetCalibrationState ( ACQUIRING );
-    m_calibThread = new boost::thread ( boost::bind ( &PCCoreCameraCalibration::Process, this ) );
+    m_calibThread = new boost::thread ( boost::bind ( &pcc::CameraCalibration::Process, this ) );
 }
-void PCCoreCameraCalibration::DoAbortCalibration ()
+void pcc::CameraCalibration::DoAbortCalibration ()
 {
     SetCalibrationState ( UNKNOWN );
 
@@ -202,7 +133,7 @@ void PCCoreCameraCalibration::DoAbortCalibration ()
     std::vector<cv::Mat> ().swap ( m_frameList );
     std::vector< std::vector<cv::Point2f> >().swap ( m_corners );
 }
-void PCCoreCameraCalibration::SetCalibrationState ( CalibrationState const& iNewState )
+void pcc::CameraCalibration::SetCalibrationState ( CalibrationState const& iNewState )
 {
     CalibrationState oldState;
     {

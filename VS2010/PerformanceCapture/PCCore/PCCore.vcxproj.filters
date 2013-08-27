@@ -35,7 +35,13 @@
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreStereoCameraPair.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCalibrationHelper.h">
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\Chessboard.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CameraCalibration.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CalibrationHelper.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
@@ -55,7 +61,13 @@
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreStereoCameraPair.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCalibrationHelper.cpp">
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\Chessboard.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CameraCalibration.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CalibrationHelper.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

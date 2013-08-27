@@ -44,7 +44,7 @@ void PCCoreStereoCameraPair::OnCameraCalibrated ( PCCoreCamera* iCamera, Calibra
 void PCCoreStereoCameraPair::Calibrate ()
 {
     cv::stereoCalibrate (
-        PCCoreCalibrationHelper::GetInstance ().GetChessboardPoints (),
+        pcc::CalibrationHelper::GetInstance ().GetChessboardPoints (),
         m_left->GetChessboardCorners (),
         m_right->GetChessboardCorners (),
         m_left->CameraMatrix (),

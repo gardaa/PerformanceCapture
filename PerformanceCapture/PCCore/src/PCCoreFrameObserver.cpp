@@ -1,8 +1,6 @@
 #include "PCCoreFrameObserver.h"
 #include "PCCoreSystem.h"
 
-#include "PCCoreCalibrationHelper.h"
-
 void PCCoreFrameObserver::FrameReceived ( FramePtr const pFrame )
 {
     PCCoreSystem& cs = PCCoreSystem::GetInstance ();

@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCalibrationHelper.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CameraCalibration.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\Chessboard.h" />
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\CalibrationHelper.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreCamera.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrame.h" />
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreFrameObserver.h" />
@@ -30,7 +32,9 @@
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PCCoreExport.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCalibrationHelper.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CameraCalibration.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\Chessboard.cpp" />
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\CalibrationHelper.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreCamera.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreFrame.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PCCoreStereoCameraPair.cpp" />
