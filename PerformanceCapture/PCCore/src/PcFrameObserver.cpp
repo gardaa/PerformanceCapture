@@ -7,9 +7,9 @@ void PcFrameObserver::FrameReceived ( VmbAPI::FramePtr const pFrame )
 {
     PcSystem& cs = PcSystem::GetInstance ();
     
-    VmbAPI::VmbFrameStatusType status;
+    VmbFrameStatusType status;
     pFrame->GetReceiveStatus ( status );
-    if ( status == VmbAPI::VmbFrameStatusComplete ) {
+    if ( status == VmbFrameStatusComplete ) {
         cs.SetFrame ( m_pCamera, pFrame );
     }
 

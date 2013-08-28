@@ -32,7 +32,7 @@ PcSystem::PcSystem()
 
 void PcSystem::Setup ()
 {
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
     VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();    
 
     VmbAPI::CameraPtrVector cameras;
@@ -212,24 +212,24 @@ std::string PcSystem::GetCameraStatus ( std::string const& iCameraId )
     return m_activeCameras.at ( iCameraId )->GetPtpStatus ();
 }
 
-double PcSystem::GetPcCameraCalibrationProgress ( std::string const& iCameraId )
+double PcSystem::GetCameraCalibrationProgress ( std::string const& iCameraId )
 {
     return m_activeCameras.at ( iCameraId )->GetCalibrationProgress ();
 }
 
 void PcSystem::SetFrame ( VmbAPI::CameraPtr const& iCamera, VmbAPI::FramePtr const& iFrame )
 {
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
 
-    VmbAPI::VmbUint32_t height;
+    VmbUint32_t height;
     err = iFrame->GetHeight (height);
     ERR_CHK ( err, VmbErrorSuccess, "Error reading frame height." );
 
-    VmbAPI::VmbUint32_t width;
+    VmbUint32_t width;
     err = iFrame->GetWidth (width);
     ERR_CHK ( err, VmbErrorSuccess, "Error reading frame width." );
 
-    VmbAPI::VmbUchar_t const* frameData;
+    VmbUchar_t const* frameData;
     err = iFrame->GetImage(frameData);
     ERR_CHK ( err, VmbErrorSuccess, "Error reading frame image data." );
 
@@ -279,7 +279,7 @@ void PcSystem::UnregisterCamera ( std::string const& iCameraId )
         cam->second->AdjustBandwidth ( GetMaxPerCameraBandwidth () );
     }
 }
-void PcSystem::RegisterCamera ( std::string const& iCameraId, CameraPtr const& iCamera )
+void PcSystem::RegisterCamera ( std::string const& iCameraId, VmbAPI::CameraPtr const& iCamera )
 {
     if ( m_activeCameras.find ( iCameraId ) != m_activeCameras.end () ) {
         return;
@@ -305,7 +305,7 @@ void PcSystem::CameraListChanged ( VmbAPI::CameraPtr iCamera, VmbAPI::UpdateTrig
 {
     GuardType lock (*m_mutex);
 
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
     std::string sCamId;
     err = iCamera->GetID ( sCamId );
     

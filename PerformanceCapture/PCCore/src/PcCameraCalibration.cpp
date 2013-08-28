@@ -6,6 +6,8 @@
 #include "PcCalibrationHelper.h"
 #include "PcSystem.h"
 
+using namespace pcc;
+
 // ----------------------------------------------------------------------
 // PcCameraCalibration
 // ----------------------------------------------------------------------
@@ -14,13 +16,12 @@ PcCameraCalibration::PcCameraCalibration ( PcCamera* iParent )
     :   m_mutex ()
     ,   m_stateMutex ()
     ,   m_calibState ( UNKNOWN )
-    ,   m_calibThread ( (boost::thread*) 0x0 )
+    ,   m_calibThread ( (ThreadType*) 0x0 )
     ,   m_frameQueue ()
     ,   m_frameList ()
     ,   m_corners ()
     ,   m_camera ( iParent )
     ,   m_count ( 0u )
-    ,   m_fuckupCount ( 0u )
 {}
 PcCameraCalibration::~PcCameraCalibration ()
 {

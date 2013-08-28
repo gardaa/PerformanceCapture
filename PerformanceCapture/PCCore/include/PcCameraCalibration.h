@@ -29,7 +29,7 @@ namespace pcc
     private:
         typedef boost::thread                                                           ThreadType;
         typedef boost::shared_mutex                                                     MutexType;
-        typedef boost::upgrade_lock<MutexType>                                          UpgradedLockType;
+        typedef boost::upgrade_lock<MutexType>                                          UpgradeLockType;
         typedef boost::upgrade_to_unique_lock<MutexType>                                UniqueLockType;
         typedef boost::function3<void, PcCamera*, CalibrationState, CalibrationState>   CallbackFn;
 

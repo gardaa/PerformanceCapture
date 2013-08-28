@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+using namespace pcc;
+
 PcCamera::PcCamera (
     VmbAPI::CameraPtr const&        iCamera
 )   :   m_isSetup ( false )
@@ -95,21 +97,21 @@ inline bool PcCamera::TrySetFeature (
     T const&            iFeatureValue,
     bool const&         iVerbose
 ) {
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
     VmbAPI::FeaturePtr f;
 
     if (iVerbose)
         std::cout << "  - Acquiring feature [" << iFeatureName << "]... ";
     
     err = m_camera->GetFeatureByName ( iFeatureName.c_str (), f );
-    if ( VmbAPI::VmbErrorSuccess == err ) {
+    if ( VmbErrorSuccess == err ) {
         if (iVerbose)
             std::cout << "OK" << std::endl;
         
         if (iVerbose)
             std::cout << "    - Setting feature [" << iFeatureName << "]... ";
         err = f->SetValue ( iFeatureValue );
-        if ( VmbAPI::VmbErrorSuccess == err ) {
+        if ( VmbErrorSuccess == err ) {
             if (iVerbose)
                 std::cout << "OK [" << iFeatureValue << "]" << std::endl;
             return true;
@@ -130,21 +132,21 @@ inline bool PcCamera::TryGetFeature (
     T&                  oFeatureValue,
     bool const&         iVerbose
 ) {
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
     VmbAPI::FeaturePtr f;
 
     if (iVerbose)
         std::cout << "  - Acquiring feature [" << iFeatureName << "]... ";
     
     err = m_camera->GetFeatureByName ( iFeatureName.c_str (), f );
-    if ( VmbAPI::VmbErrorSuccess == err ) {
+    if ( VmbErrorSuccess == err ) {
         if (iVerbose)
             std::cout << "OK" << std::endl;
         
         if (iVerbose)
             std::cout << "    - Reading feature [" << iFeatureName << "]... ";
         err = f->GetValue ( oFeatureValue );
-        if ( VmbAPI::VmbErrorSuccess == err ) {
+        if ( VmbErrorSuccess == err ) {
             if (iVerbose)
                 std::cout << "OK [" << oFeatureValue << "]" << std::endl;
             return true;
@@ -163,21 +165,21 @@ inline bool PcCamera::TryRunFeature (
     std::string const&  iFeatureName,
     bool const&         iVerbose
 ) {
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
     VmbAPI::FeaturePtr f;
 
     if (iVerbose)
         std::cout << "  - Acquiring command feature [" << iFeatureName << "]... ";
     
     err = m_camera->GetFeatureByName ( iFeatureName.c_str (), f );
-    if ( VmbAPI::VmbErrorSuccess == err ) {
+    if ( VmbErrorSuccess == err ) {
         if (iVerbose)
             std::cout << "OK" << std::endl;
         
         if (iVerbose)
             std::cout << "    - Running command feature [" << iFeatureName << "]... ";
         err = f->RunCommand ();
-        if ( VmbAPI::VmbErrorSuccess == err ) {
+        if ( VmbErrorSuccess == err ) {
             if (iVerbose)
                 std::cout << "OK" << std::endl;
             return true;
@@ -197,21 +199,21 @@ inline bool PcCamera::TryRegisterObserver (
     VmbAPI::IFeatureObserverPtr const&  iObserver,
     bool const&                         iVerbose
 ) {
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
     VmbAPI::FeaturePtr f;
 
     if (iVerbose)
         std::cout << "  - Acquiring feature [" << iFeatureName << "]... ";
     
     err = m_camera->GetFeatureByName ( iFeatureName.c_str (), f );
-    if ( VmbAPI::VmbErrorSuccess == err ) {
+    if ( VmbErrorSuccess == err ) {
         if (iVerbose)
             std::cout << "OK" << std::endl;
         
         if (iVerbose)
             std::cout << "    - Registering feature observer [" << iFeatureName << "]... ";
         err = f->RegisterObserver ( iObserver );
-        if ( VmbAPI::VmbErrorSuccess == err ) {
+        if ( VmbErrorSuccess == err ) {
             if (iVerbose)
                 std::cout << "OK" << std::endl;
             return true;
@@ -228,16 +230,16 @@ inline bool PcCamera::TryRegisterObserver (
 
 void PcCamera::Setup () {
     if ( !m_isSetup ) {
-        VmbAPI::VmbErrorType err;
-        VmbAPI::VmbInt64_t payload;
+        VmbErrorType err;
+        VmbInt64_t payload;
         VmbAPI::FeaturePtr f;
 
         err = m_camera->GetID ( m_cameraId );
         std::cout << "Camera " << m_cameraId << " { " << std::endl;
 
         std::cout << "  - Opening... ";
-        err = m_camera->Open ( VmbAPI::VmbAccessModeFull );
-        if ( VmbAPI::VmbErrorSuccess == err ) {
+        err = m_camera->Open ( VmbAccessModeFull );
+        if ( VmbErrorSuccess == err ) {
             std::cout << "OK" << std::endl;
             
             //FeaturePtrVector features;
@@ -257,7 +259,7 @@ void PcCamera::Setup () {
 
             TryGetFeature ( "PayloadSize", payload );
             
-            VmbAPI::VmbInt64_t f;
+            VmbInt64_t f;
             TryGetFeature ( "Height", f );
             m_frameSize.height = f;
             TryGetFeature ( "Width", f );
@@ -266,8 +268,8 @@ void PcCamera::Setup () {
             TrySetFeature ( "TriggerSelector", "FrameStart" );
             TrySetFeature ( "TriggerMode", "On" );
             TrySetFeature ( "TriggerSource", "Freerun" );
-            TrySetFeature ( "PixelFormat", VmbAPI::VmbPixelFormatMono8 );
-            TrySetFeature ( "GVSPPacketSize", (VmbAPI::VmbInt32_t)1500 );
+            TrySetFeature ( "PixelFormat", VmbPixelFormatMono8 );
+            TrySetFeature ( "GVSPPacketSize", (VmbInt32_t)1500 );
             TrySetFeature ( "ExposureTimeAbs", 15000.0 );
             TrySetFeature ( "GainAuto", "Continuous" );
 
@@ -282,13 +284,13 @@ void PcCamera::Setup () {
 
 void PcCamera::StartAcquisition ()
 {
-    VmbAPI::VmbErrorType err = m_camera->StartContinuousImageAcquisition ( 10, VmbAPI::IFrameObserverPtr ( new PcFrameObserver ( m_camera ) ) );
+    VmbErrorType err = m_camera->StartContinuousImageAcquisition ( 10, VmbAPI::IFrameObserverPtr ( new PcFrameObserver ( m_camera ) ) );
     m_isAcquiring = ( err == VmbErrorSuccess );
 
     if ( m_isSynced ) {
         bool verbose = false;
 
-        VmbAPI::VmbInt64_t timestamp, timestampClock;
+        VmbInt64_t timestamp, timestampClock;
         TryRunFeature ( "GevTimestampControlLatch", verbose );
         TryGetFeature ( "GevTimestampValue", timestamp, verbose );
         TryGetFeature ( "GevTimestampTickFrequency", timestampClock, verbose );
@@ -306,7 +308,7 @@ void PcCamera::StopAcquisition ()
 
 void PcCamera::AdjustBandwidth ( unsigned int const& iBandwidth )
 {
-    TrySetFeature ( "StreamBytesPerSecond", (VmbAPI::VmbInt32_t)iBandwidth, false );
+    TrySetFeature ( "StreamBytesPerSecond", (VmbInt32_t)iBandwidth, false );
 }
 
 class PtpSyncAgent
