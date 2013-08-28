@@ -27,7 +27,7 @@ public slots:
     void calibrateCameras ();
     
 private:
-    void DrawFrame ( int const& row, int const& col, PcFramePtr const& frame, std::string const& cameraStatus, float const& progress );
+    void DrawFrame ( int const& row, int const& col, pcc::PcFramePtr const& frame, std::string const& cameraStatus, float const& progress );
     void AdjustGrid ( const int& nElems );
 
 private:

@@ -87,7 +87,7 @@ void FrameViewer::paintGL ()
         const int r = f / m_nCols;
         const int c = f % m_nCols;
 
-        float progress = cs.GetPcCameraCalibrationProgress ( cameras[f] );
+        float progress = cs.GetCameraCalibrationProgress ( cameras[f] );
         std::string const& status = cs.GetCameraStatus ( cameras[f] );
         PcFramePtr const frame = cs.GetFrameFromCamera ( cameras[f] );
 

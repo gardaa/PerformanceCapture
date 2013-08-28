@@ -13,10 +13,10 @@ PCMainWindow::PCMainWindow ( QWidget *iParent )
     :   QMainWindow ( iParent )
 {
     // VimbaSystem setup.
-    VmbAPI::VmbErrorType err;
+    VmbErrorType err;
     VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();
     err = vmbs.Startup ();
-    ERR_CHK ( err, VmbAPI::VmbErrorSuccess, "Error initializing VimbaSystem." );
+    ERR_CHK ( err, VmbErrorSuccess, "Error initializing VimbaSystem." );
 
     ParameterHandler& params = ParameterHandler::Instance ();
 
