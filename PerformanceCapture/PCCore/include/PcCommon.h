@@ -1,5 +1,13 @@
-#ifndef PCCORECOMMON_H
-#define PCCORECOMMON_H
+#ifndef PCCOMMON_H
+#define PCCOMMON_H
+
+#ifndef PCC_USER_DEFINED_TYPES
+#define QUEUE(T)        std::queue< T >
+#define STRMAP(T)       std::map< std::string, T >
+#define STRUMAP(T)      std::unordered_map< std::string, T >
+#define VEC(T)          std::vector< T >
+#endif
+#define VECOFVECS(T)    VEC(VEC(T))
 
 #define PCC_OBJ_FREE(ptr)\
     do { \
@@ -25,4 +33,4 @@
         } \
     } while ( false )
 
-#endif // PCCORECOMMON_H
+#endif // PCCOMMON_H

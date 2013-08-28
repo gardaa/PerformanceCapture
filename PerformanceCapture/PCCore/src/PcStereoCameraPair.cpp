@@ -1,18 +1,20 @@
-#include "PCCoreStereoCameraPair.h"
+#include "PcStereoCameraPair.h"
 
-#include "PCCoreCommon.h"
+#include "PcCommon.h"
 
-#include "PCCoreFrame.h"
-#include "PCCoreCamera.h"
-#include "PCCoreSystem.h"
+#include "PcFrame.h"
+#include "PcCamera.h"
+#include "PcSystem.h"
 
 #include <boost/log/trivial.hpp>
 
 #include <opencv2/calib3d/calib3d.hpp>
 
-PCCoreStereoCameraPair::PCCoreStereoCameraPair (
-    PCCoreCameraPtr         iLeft,
-    PCCoreCameraPtr         iRight
+using namespace pcc;
+
+PcStereoCameraPair::PcStereoCameraPair (
+    PcCameraPtr         iLeft,
+    PcCameraPtr         iRight
 )   :   m_left ()
     ,   m_right ()
     ,   m_stereoRotation ()
@@ -24,27 +26,27 @@ PCCoreStereoCameraPair::PCCoreStereoCameraPair (
     SetRight ( iRight );
 }
 
-PCCoreStereoCameraPair::~PCCoreStereoCameraPair ()
+PcStereoCameraPair::~PcStereoCameraPair ()
 {}
 
-void PCCoreStereoCameraPair::OnCameraCalibrated ( PCCoreCamera* iCamera, pcc::CalibrationState iOldState, pcc::CalibrationState iNewState )
+void PcStereoCameraPair::OnCameraCalibrated ( PcCamera* iCamera, CalibrationState iOldState, CalibrationState iNewState )
 {
     std::string const& camId = iCamera->GetID ();
-    if ( iNewState == pcc::CALIBRATED && camId.compare ( m_left->GetID () ) == 0 ) {
-        if ( m_right.get () != 0x0 && m_right->GetCalibrationState () == pcc::CALIBRATED ) {
+    if ( iNewState == CALIBRATED && camId.compare ( m_left->GetID () ) == 0 ) {
+        if ( m_right.get () != 0x0 && m_right->GetCalibrationState () == CALIBRATED ) {
             Calibrate ();
         }
-    } else if ( iNewState == pcc::CALIBRATED && camId.compare ( m_right->GetID () ) == 0 ) {
-        if ( m_left.get () != 0x0 && m_left->GetCalibrationState () == pcc::CALIBRATED ) {
+    } else if ( iNewState == CALIBRATED && camId.compare ( m_right->GetID () ) == 0 ) {
+        if ( m_left.get () != 0x0 && m_left->GetCalibrationState () == CALIBRATED ) {
             Calibrate ();
         }
     }
 }
 
-void PCCoreStereoCameraPair::Calibrate ()
+void PcStereoCameraPair::Calibrate ()
 {
     cv::stereoCalibrate (
-        pcc::CalibrationHelper::GetInstance ().GetChessboardPoints (),
+        PcCalibrationHelper::GetInstance ().GetChessboardPoints (),
         m_left->GetChessboardCorners (),
         m_right->GetChessboardCorners (),
         m_left->CameraMatrix (),

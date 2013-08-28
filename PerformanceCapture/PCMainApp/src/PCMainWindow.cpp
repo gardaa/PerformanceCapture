@@ -1,4 +1,4 @@
-#include "PCCoreErrChk.h"
+#include "PcErrChk.h"
 #include "PCMainWindow.h"
 #include "FrameViewer.h"
 #include "ParameterHandler.h"
@@ -7,16 +7,16 @@
 #include <QTimer>
 #include <VimbaCPP/Include/VimbaSystem.h>
 
-using namespace AVT::VmbAPI;
+using namespace AVT;
 
 PCMainWindow::PCMainWindow ( QWidget *iParent )
     :   QMainWindow ( iParent )
 {
     // VimbaSystem setup.
-    VmbErrorType err;
-    VimbaSystem& vmbs = VimbaSystem::GetInstance ();
+    VmbAPI::VmbErrorType err;
+    VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();
     err = vmbs.Startup ();
-    ERR_CHK ( err, VmbErrorSuccess, "Error initializing VimbaSystem." );
+    ERR_CHK ( err, VmbAPI::VmbErrorSuccess, "Error initializing VimbaSystem." );
 
     ParameterHandler& params = ParameterHandler::Instance ();
 
@@ -42,6 +42,6 @@ PCMainWindow::PCMainWindow ( QWidget *iParent )
 PCMainWindow::~PCMainWindow()
 {
     // Shuts down the operating VimbaSystem.
-    VimbaSystem& vmbs = VimbaSystem::GetInstance ();
+    VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();
     vmbs.Shutdown ();
 }

@@ -1,6 +1,6 @@
-#include "PCCoreErrChk.h"
+#include "PcErrChk.h"
 #include "FrameViewer.h"
-#include "PCCoreSystem.h"
+#include "PcSystem.h"
 #include "ParameterHandler.h"
 
 #include <gl/GL.h>
@@ -12,6 +12,8 @@
 #include <iomanip>
 
 #include <QTimer>
+
+using namespace pcc;
 
 FrameViewer::FrameViewer ( QWidget *iParent )
     :   QGLWidget ( iParent ),
@@ -29,7 +31,7 @@ FrameViewer::FrameViewer ( QWidget *iParent )
                  this, SLOT   ( updateGL () )
     );
     
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     unsigned int nFrames = cs.GetNumFrames ();
 
     //cs.StartCapture ();
@@ -42,10 +44,10 @@ FrameViewer::FrameViewer ( QWidget *iParent )
 
 FrameViewer::~FrameViewer ()
 {
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     cs.EndCapture ();
     
-    PCCoreSystem::DestroyInstance ();
+    PcSystem::DestroyInstance ();
 
     if ( m_textures ) {
         delete m_textures;
@@ -74,7 +76,7 @@ void FrameViewer::resizeGL ( int w, int h )
 void FrameViewer::paintGL ()
 {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     cs.UpdateCameras ();
 
     std::vector<std::string> cameras = cs.GetCameraList ();
@@ -85,9 +87,9 @@ void FrameViewer::paintGL ()
         const int r = f / m_nCols;
         const int c = f % m_nCols;
 
-        float progress = cs.GetCameraCalibrationProgress ( cameras[f] );
+        float progress = cs.GetPcCameraCalibrationProgress ( cameras[f] );
         std::string const& status = cs.GetCameraStatus ( cameras[f] );
-        PCCoreFramePtr const frame = cs.GetFrameFromCamera ( cameras[f] );
+        PcFramePtr const frame = cs.GetFrameFromCamera ( cameras[f] );
 
         //std::cout << "Camera " << cameras[f] << ": " << status << std::endl;
         
@@ -99,19 +101,19 @@ void FrameViewer::paintGL ()
 }
 void FrameViewer::setNumColumns ( int c )
 {
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     m_nCols = c;
     AdjustGrid ( cs.GetNumFrames () );
 }
 
 void FrameViewer::calibrateCameras ()
 {
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
 
     cs.CalibrateCameras ();
 }
 
-void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFramePtr const& frame, std::string const& cameraStatus, float const& progress )
+void FrameViewer::DrawFrame ( int const& row, int const& col, PcFramePtr const& frame, std::string const& cameraStatus, float const& progress )
 {
     int vpw = m_width  / m_nCols;
     int vph = m_height / m_nRows;

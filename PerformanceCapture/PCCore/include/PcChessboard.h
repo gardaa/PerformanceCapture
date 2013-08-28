@@ -1,32 +1,33 @@
 #ifndef CHESSBOARD_H
 #define CHESSBOARD_H
 
+#include "PcCommon.h"
 #include <vector>
 
 #include <opencv2/calib3d/calib3d.hpp>
 
 namespace pcc
 {
-    class Chessboard {
+    class PcChessboard {
     public:
-        Chessboard (
+        PcChessboard (
             unsigned int const&     iRows,
             unsigned int const&     iCols,
             float const&            iSquareSize
         );
-        inline ~Chessboard () {}
+        inline ~PcChessboard () {}
 
-        inline std::vector< cv::Point3f > const& GetPoints () const { return m_points; }
+        inline VEC(cv::Point3f) const& GetPoints () const { return m_points; }
         inline cv::Size const& GetSize () const { return m_size; }
 
-        std::vector< std::vector< cv::Point3f > > CreateInputArray (
+        VECOFVECS(cv::Point3f) CreateInputArray (
             unsigned int        iFrameCount
         );
 
     private:
         cv::Size                    m_size;
         float                       m_squareSize;
-        std::vector< cv::Point3f >  m_points;
+        VEC(cv::Point3f)            m_points;
     };
 }
 
