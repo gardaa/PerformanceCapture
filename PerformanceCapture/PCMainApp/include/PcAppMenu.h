@@ -1,5 +1,5 @@
-#ifndef PCMAINAPPMENU_H
-#define PCMAINAPPMENU_H
+#ifndef PCAPPMENU_H
+#define PCAPPMENU_H
 
 #include <QDockWidget>
 
@@ -7,7 +7,7 @@ class QSlider;
 class QGroupBox;
 class QPushButton;
 
-class PCMainAppMenu :
+class PcAppMenu :
     public QDockWidget
 {
     Q_OBJECT
@@ -21,8 +21,8 @@ public slots:
     void onSynchronisationClicked ();
 
 public:
-    explicit PCMainAppMenu ( QWidget* iParent = 0 );
-    ~PCMainAppMenu ();
+    explicit PcAppMenu ( QWidget* iParent = 0 );
+    ~PcAppMenu ();
 
 private:
     // Main container
@@ -40,4 +40,4 @@ private:
     QSlider*        m_numColumns;
 };
 
-#endif // PCMAINAPPMENU_H
+#endif // PCAPPMENU_H

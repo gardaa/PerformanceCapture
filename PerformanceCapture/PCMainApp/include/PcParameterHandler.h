@@ -1,10 +1,10 @@
-#ifndef PARAMETERHANDLER_H
-#define PARAMETERHANDLER_H
+#ifndef PCPARAMETERHANDLER_H
+#define PCPARAMETERHANDLER_H
 
 #include <QObject>
 
-//! Singleton
-class ParameterHandler
+/// Singleton
+class PcParameterHandler
     :   public QObject
 {
     Q_OBJECT
@@ -22,19 +22,19 @@ public slots:
     void SetViewportCols ( const int& iViewportCols );
 
 public:
-    static inline ParameterHandler& Instance () {
-        static ParameterHandler _instance;
+    static inline PcParameterHandler& Instance () {
+        static PcParameterHandler _instance;
         
         return _instance;
     }
 
 private:
-    ParameterHandler ();
-    explicit ParameterHandler ( ParameterHandler const& iOther ) {}
+    PcParameterHandler ();
+    explicit PcParameterHandler ( PcParameterHandler const& iOther ) {}
 
 private:
     int                     m_refreshTimeout;
     int                     m_viewportCols;
 };
 
-#endif // PARAMETERHANDLER_H
+#endif // PCPARAMETERHANDLER_H

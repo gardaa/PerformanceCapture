@@ -1,7 +1,7 @@
-#include "PCCoreErrChk.h"
-#include "FrameViewer.h"
-#include "PCCoreSystem.h"
-#include "ParameterHandler.h"
+#include "PcErrChk.h"
+#include "PcFrameViewer.h"
+#include "PcSystem.h"
+#include "PcParameterHandler.h"
 
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -13,11 +13,13 @@
 
 #include <QTimer>
 
-FrameViewer::FrameViewer ( QWidget *iParent )
+using namespace pcc;
+
+PcFrameViewer::PcFrameViewer ( QWidget *iParent )
     :   QGLWidget ( iParent ),
         m_nCols ( 0 )
 {
-    ParameterHandler& params = ParameterHandler::Instance ();
+    PcParameterHandler& params = PcParameterHandler::Instance ();
 
     m_updateTimer = new QTimer ( this );
     m_updateTimer->setInterval ( params.GetRefreshTimeout() );
@@ -29,7 +31,7 @@ FrameViewer::FrameViewer ( QWidget *iParent )
                  this, SLOT   ( updateGL () )
     );
     
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     unsigned int nFrames = cs.GetNumFrames ();
 
     //cs.StartCapture ();
@@ -40,12 +42,12 @@ FrameViewer::FrameViewer ( QWidget *iParent )
     setNumColumns ( params.GetViewportCols () );
 }
 
-FrameViewer::~FrameViewer ()
+PcFrameViewer::~PcFrameViewer ()
 {
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     cs.EndCapture ();
     
-    PCCoreSystem::DestroyInstance ();
+    PcSystem::DestroyInstance ();
 
     if ( m_textures ) {
         delete m_textures;
@@ -53,7 +55,7 @@ FrameViewer::~FrameViewer ()
     }
 }
 
-void FrameViewer::initializeGL ()
+void PcFrameViewer::initializeGL ()
 {
     glEnable (GL_TEXTURE_2D);
     glShadeModel (GL_SMOOTH);
@@ -66,15 +68,15 @@ void FrameViewer::initializeGL ()
     int x = 0;
     glutInit ( &x, NULL );
 }
-void FrameViewer::resizeGL ( int w, int h )
+void PcFrameViewer::resizeGL ( int w, int h )
 {
     m_width = w;
     m_height = h;
 }
-void FrameViewer::paintGL ()
+void PcFrameViewer::paintGL ()
 {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     cs.UpdateCameras ();
 
     std::vector<std::string> cameras = cs.GetCameraList ();
@@ -87,7 +89,7 @@ void FrameViewer::paintGL ()
 
         float progress = cs.GetCameraCalibrationProgress ( cameras[f] );
         std::string const& status = cs.GetCameraStatus ( cameras[f] );
-        PCCoreFramePtr const frame = cs.GetFrameFromCamera ( cameras[f] );
+        PcFramePtr const frame = cs.GetFrameFromCamera ( cameras[f] );
 
         //std::cout << "Camera " << cameras[f] << ": " << status << std::endl;
         
@@ -97,21 +99,21 @@ void FrameViewer::paintGL ()
     //DrawFrame ( 0, 0, frames[0] );
     //DrawFrame ( 0, 1, frames[1] );
 }
-void FrameViewer::setNumColumns ( int c )
+void PcFrameViewer::setNumColumns ( int c )
 {
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
     m_nCols = c;
     AdjustGrid ( cs.GetNumFrames () );
 }
 
-void FrameViewer::calibrateCameras ()
+void PcFrameViewer::calibrateCameras ()
 {
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
 
     cs.CalibrateCameras ();
 }
 
-void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFramePtr const& frame, std::string const& cameraStatus, float const& progress )
+void PcFrameViewer::DrawFrame ( int const& row, int const& col, PcFramePtr const& frame, std::string const& cameraStatus, float const& progress )
 {
     int vpw = m_width  / m_nCols;
     int vph = m_height / m_nRows;
@@ -243,7 +245,7 @@ void FrameViewer::DrawFrame ( int const& row, int const& col, PCCoreFramePtr con
     glPopMatrix ();
 }
 
-void FrameViewer::AdjustGrid ( int const& nElems )
+void PcFrameViewer::AdjustGrid ( int const& nElems )
 {
     m_nRows = (nElems / m_nCols);
     if ( nElems % m_nCols ) {

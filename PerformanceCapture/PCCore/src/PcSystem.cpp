@@ -1,10 +1,10 @@
-#include "PCCoreSystem.h"
+#include "PcSystem.h"
 
-#include "PCCoreFrame.h"
-#include "PCCoreCamera.h"
-#include "PCCoreFrameObserver.h"
-#include "PCCoreErrChk.h"
-#include "CalibrationHelper.h"
+#include "PcFrame.h"
+#include "PcCamera.h"
+#include "PcFrameObserver.h"
+#include "PcErrChk.h"
+#include "PcCalibrationHelper.h"
 
 #define BOOST_ALL_DYN_LINK
 #include <boost/thread/thread.hpp>
@@ -13,28 +13,29 @@
 #include <opencv2/gpu/gpu.hpp>
 #include <opencv2/gpu/gpumat.hpp>
 
-using namespace AVT::VmbAPI;
+using namespace AVT;
+using namespace pcc;
 
 // Total available bandwidth in bytes
 static unsigned int const MAX_BW = 124000000;
 
-ICameraListObserverPtr PCCoreSystem::sm_pInstance ( (PCCoreSystem*)0x0 );
-int PCCoreSystem::sm_nAvailableCameras = 0;
+VmbAPI::ICameraListObserverPtr PcSystem::sm_pInstance ( (PcSystem*)0x0 );
+int PcSystem::sm_nAvailableCameras = 0;
 
-PCCoreSystem::PCCoreSystem()
-    :   ICameraListObserver ()
+PcSystem::PcSystem()
+    :   VmbAPI::ICameraListObserver ()
     ,   m_activeCameras ()
-    ,   m_mutex ( new boost::mutex () )
+    ,   m_mutex ( new MutexType () )
     ,   m_frames ()
     ,   m_stereo ()
 {}
 
-void PCCoreSystem::Setup ()
+void PcSystem::Setup ()
 {
     VmbErrorType err;
-    VimbaSystem& vmbs = VimbaSystem::GetInstance ();    
+    VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();    
 
-    CameraPtrVector cameras;
+    VmbAPI::CameraPtrVector cameras;
     err = vmbs.GetCameras ( cameras );
     ERR_CHK ( err, VmbErrorSuccess, "Error getting camera list." );
 
@@ -45,8 +46,8 @@ void PCCoreSystem::Setup ()
         //RegisterCamera ( sCamId, *cam );
         m_addQueue.push ( *cam );
 
-        //PCCoreCamera camera ( *cam, MAX_BW / cameras.size () );
-        //PCCoreFrame frame;
+        //PcCamera camera ( *cam, MAX_BW / cameras.size () );
+        //PcFrame frame;
         //std::string sCamId;
         //(*cam)->GetID ( sCamId );
         //RegisterCamera ( sCamId, *cam );
@@ -90,7 +91,7 @@ void PCCoreSystem::Setup ()
         //FramePtrVector frameList;
         //frameList.resize ( 3 );
 
-        //IFrameObserverPtr observer ( new PCCoreFrameObserver ( camera ) );
+        //IFrameObserverPtr observer ( new PcFrameObserver ( camera ) );
         //for ( unsigned int j = 0; j < 3; j++ ) {
         //    FramePtr newFrame ( new Frame ( payload ) );
         //    
@@ -105,13 +106,13 @@ void PCCoreSystem::Setup ()
     std::cout << "Maximum per-camera bandwidth: " << GetMaxPerCameraBandwidth () << std::endl;
 }
 
-PCCoreSystem::~PCCoreSystem ()
+PcSystem::~PcSystem ()
 {
     PCC_OBJ_FREE ( m_mutex );
 
-    //pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
-    //if ( calib.CurrentState () == pcc::CalibrationHelper::ACQUIRING || 
-    //    calib.CurrentState () == pcc::CalibrationHelper::CALIBRATING ) {
+    //PcCalibrationHelper& calib = PcCalibrationHelper::GetInstance ();
+    //if ( calib.CurrentState () == PcCalibrationHelper::ACQUIRING || 
+    //    calib.CurrentState () == PcCalibrationHelper::CALIBRATING ) {
     //    calib.AbortCalibration ();
     //}
     for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
@@ -119,26 +120,26 @@ PCCoreSystem::~PCCoreSystem ()
     }
 }
 
-PCCoreSystem& PCCoreSystem::GetInstance ()
+PcSystem& PcSystem::GetInstance ()
 {
-    PCCoreSystem* instance = dynamic_cast<PCCoreSystem*>(sm_pInstance.get ());
+    PcSystem* instance = dynamic_cast<PcSystem*>(sm_pInstance.get ());
 
-    if ( instance == (PCCoreSystem*)0x0 ) {
-        instance = new PCCoreSystem ();
+    if ( instance == (PcSystem*)0x0 ) {
+        instance = new PcSystem ();
         sm_pInstance.reset ( instance );
         
-        VimbaSystem& vmbs = VimbaSystem::GetInstance ();
+        VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();
         vmbs.RegisterCameraListObserver ( sm_pInstance );
         instance->Setup ();
     }
     return (*instance);
 }
-void PCCoreSystem::DestroyInstance ()
+void PcSystem::DestroyInstance ()
 {
-    sm_pInstance.reset ( (PCCoreSystem*)0x0 );
+    sm_pInstance.reset ( (PcSystem*)0x0 );
 }
 
-void PCCoreSystem::StartCapture ()
+void PcSystem::StartCapture ()
 {
     //VmbErrorType err;
     //for ( unsigned int i = 0; i < m_cameras.size (); i++ ) {
@@ -165,7 +166,7 @@ void PCCoreSystem::StartCapture ()
     //    err = acquisitionStartCmd->RunCommand ();
     //    ERR_CHK ( err, VmbErrorSuccess, "Error starting acquisition" );
     //}
-    boost::lock_guard<boost::mutex> lock (*m_mutex);
+    GuardType lock (*m_mutex);
 
     for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
         if ( !camera->second->IsAcquiring () ) {
@@ -174,7 +175,7 @@ void PCCoreSystem::StartCapture ()
     }
 }
 
-void PCCoreSystem::EndCapture ()
+void PcSystem::EndCapture ()
 {
     //VmbErrorType err;
     //for ( unsigned int i = 0; i < m_cameras.size (); i++ ) {
@@ -189,7 +190,7 @@ void PCCoreSystem::EndCapture ()
     //    //err = camera->GetFeatureByName( "AcquisitionEnd", acquisitionEndCmd );
     //    //err = acquisitionEndCmd->RunCommand ();
     //}
-    boost::lock_guard<boost::mutex> lock (*m_mutex);
+    GuardType lock (*m_mutex);
     
     for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
         if ( camera->second->IsAcquiring () ) {
@@ -198,25 +199,25 @@ void PCCoreSystem::EndCapture ()
     }
 }
 
-unsigned int PCCoreSystem::GetNumFrames ()
+unsigned int PcSystem::GetNumFrames ()
 {
     return m_frames.size ();
 }
-PCCoreFramePtr const PCCoreSystem::GetFrameFromCamera ( std::string const& iCameraId )
+PcFramePtr const PcSystem::GetFrameFromCamera ( std::string const& iCameraId )
 {
     return m_frames.at ( iCameraId );
 }
-std::string PCCoreSystem::GetCameraStatus ( std::string const& iCameraId )
+std::string PcSystem::GetCameraStatus ( std::string const& iCameraId )
 {
     return m_activeCameras.at ( iCameraId )->GetPtpStatus ();
 }
 
-double PCCoreSystem::GetCameraCalibrationProgress ( std::string const& iCameraId )
+double PcSystem::GetCameraCalibrationProgress ( std::string const& iCameraId )
 {
     return m_activeCameras.at ( iCameraId )->GetCalibrationProgress ();
 }
 
-void PCCoreSystem::SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame )
+void PcSystem::SetFrame ( VmbAPI::CameraPtr const& iCamera, VmbAPI::FramePtr const& iFrame )
 {
     VmbErrorType err;
 
@@ -237,8 +238,8 @@ void PCCoreSystem::SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame )
     
     m_frames[sCamId]->Reset ( width, height, 1, frameData );
     
-    //pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
-    if ( m_activeCameras.at ( sCamId )->GetCalibrationState () == pcc::ACQUIRING ) {
+    //PcCalibrationHelper& calib = PcCalibrationHelper::GetInstance ();
+    if ( m_activeCameras.at ( sCamId )->GetCalibrationState () == ACQUIRING ) {
         m_activeCameras.at ( sCamId )->TryPushFrame ( m_frames.at ( sCamId ) );
     }
     //memcpy ( m_data[uiCamId].data, frameData, width * height * sizeof ( unsigned char ) );
@@ -264,12 +265,12 @@ void PCCoreSystem::SetFrame ( CameraPtr const& iCamera, FramePtr const& iFrame )
     //I2.download ( m_data[iCamId] );
 }
 
-void PCCoreSystem::UnregisterCamera ( std::string const& iCameraId )
+void PcSystem::UnregisterCamera ( std::string const& iCameraId )
 {
     if ( m_activeCameras.find ( iCameraId ) == m_activeCameras.end () ) {
         return;
     }
-    PCCoreCameraPtr camera = m_activeCameras.at ( iCameraId );
+    PcCameraPtr camera = m_activeCameras.at ( iCameraId );
     camera->StopAcquisition ();
 
     m_activeCameras.erase ( iCameraId );
@@ -278,19 +279,19 @@ void PCCoreSystem::UnregisterCamera ( std::string const& iCameraId )
         cam->second->AdjustBandwidth ( GetMaxPerCameraBandwidth () );
     }
 }
-void PCCoreSystem::RegisterCamera ( std::string const& iCameraId, CameraPtr const& iCamera )
+void PcSystem::RegisterCamera ( std::string const& iCameraId, VmbAPI::CameraPtr const& iCamera )
 {
     if ( m_activeCameras.find ( iCameraId ) != m_activeCameras.end () ) {
         return;
     }
-    auto newCam = std::make_pair ( iCameraId, PCCoreCameraPtr ( new PCCoreCamera ( iCamera ) ) );
+    auto newCam = std::make_pair ( iCameraId, PcCameraPtr ( new PcCamera ( iCamera ) ) );
     auto lastCam = m_activeCameras.rbegin ();
 
     m_activeCameras.insert ( newCam );
-    m_frames.insert ( std::make_pair ( iCameraId, PCCoreFramePtr ( new PCCoreFrame () ) ) );
+    m_frames.insert ( std::make_pair ( iCameraId, PcFramePtr ( new PcFrame () ) ) );
 
     if ( m_activeCameras.size () && !(m_activeCameras.size () % 2) ) {
-        m_stereo.push_back ( PCCoreStereoCameraPairPtr ( new PCCoreStereoCameraPair ( lastCam->second, newCam.second ) ) );
+        m_stereo.push_back ( PcStereoCameraPairPtr ( new PcStereoCameraPair ( lastCam->second, newCam.second ) ) );
     }
 
     newCam.second->Setup ();
@@ -300,22 +301,22 @@ void PCCoreSystem::RegisterCamera ( std::string const& iCameraId, CameraPtr cons
     newCam.second->StartAcquisition ();
 }
 
-void PCCoreSystem::CameraListChanged ( CameraPtr iCamera, UpdateTriggerType iUpdateReason )
+void PcSystem::CameraListChanged ( VmbAPI::CameraPtr iCamera, VmbAPI::UpdateTriggerType iUpdateReason )
 {
-    boost::lock_guard<boost::mutex> lock (*m_mutex);
+    GuardType lock (*m_mutex);
 
     VmbErrorType err;
     std::string sCamId;
     err = iCamera->GetID ( sCamId );
     
     std::cout << "Updated camera list." << std::endl;
-    if ( iUpdateReason == UpdateTriggerPluggedOut ) {
+    if ( iUpdateReason == VmbAPI::UpdateTriggerPluggedOut ) {
         std::cout << "Camera unplugged: " << sCamId << std::endl;
         //m_removeQueue.push ( sCamId );
-    } else if ( iUpdateReason == UpdateTriggerPluggedIn ) {
+    } else if ( iUpdateReason == VmbAPI::UpdateTriggerPluggedIn ) {
         std::cout << "Camera plugged: " << sCamId << std::endl;
         //m_addQueue.push ( iCamera );
-    } else if ( iUpdateReason == UpdateTriggerOpenStateChanged ) {
+    } else if ( iUpdateReason == VmbAPI::UpdateTriggerOpenStateChanged ) {
         //m_removeQueue.push ( sCamId );
         //m_addQueue.push ( iCamera );
 
@@ -323,7 +324,7 @@ void PCCoreSystem::CameraListChanged ( CameraPtr iCamera, UpdateTriggerType iUpd
     }
 }
 
-int PCCoreSystem::GetMaxPerCameraBandwidth ()
+int PcSystem::GetMaxPerCameraBandwidth ()
 {
     if ( !m_activeCameras.empty () ) {
         return MAX_BW / m_activeCameras.size ();
@@ -332,9 +333,9 @@ int PCCoreSystem::GetMaxPerCameraBandwidth ()
     }
 }
 
-std::vector<std::string> PCCoreSystem::GetCameraList ()
+VEC(std::string) PcSystem::GetCameraList ()
 {
-    std::vector<std::string> list;
+    VEC(std::string) list;
 
     for ( auto elem = m_activeCameras.begin (); elem != m_activeCameras.end (); elem++ ) {
         list.push_back ( elem->first );
@@ -343,9 +344,9 @@ std::vector<std::string> PCCoreSystem::GetCameraList ()
     return list;
 }
 
-void PCCoreSystem::UpdateCameras ()
+void PcSystem::UpdateCameras ()
 {
-    boost::lock_guard<boost::mutex> lock (*m_mutex);
+    GuardType lock (*m_mutex);
 
     bool hasChanged = false;
     while ( !m_removeQueue.empty () ) {
@@ -356,7 +357,7 @@ void PCCoreSystem::UpdateCameras ()
         hasChanged = true;
     }
     while ( !m_addQueue.empty () ) {
-        CameraPtr cam = m_addQueue.front ();
+        VmbAPI::CameraPtr cam = m_addQueue.front ();
 
         std::string sCamId;
         cam->GetID ( sCamId );
@@ -368,8 +369,8 @@ void PCCoreSystem::UpdateCameras ()
     }
 
     /*static bool printed = true;
-    pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance();
-    if ( calib.CurrentState() == pcc::CalibrationHelper::ACQUIRING ) {
+    PcCalibrationHelper& calib = PcCalibrationHelper::GetInstance();
+    if ( calib.CurrentState() == PcCalibrationHelper::ACQUIRING ) {
         m_frameCount++;
         if ( m_frameCount >= m_lastCalibrationFrame + calib.FrameDelay () ) {
             for ( auto frame = m_frames.begin (); frame != m_frames.end (); frame++ ) {
@@ -378,7 +379,7 @@ void PCCoreSystem::UpdateCameras ()
             m_lastCalibrationFrame = m_frameCount;
         }
         printed = false;
-    } else if ( !printed && calib.CurrentState() == pcc::CalibrationHelper::CALIBRATED ) {
+    } else if ( !printed && calib.CurrentState() == PcCalibrationHelper::CALIBRATED ) {
         for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
             std::cout << camera->first << ": " << std::endl;
             std::cout << camera->second.CameraMatrix () << std::endl;
@@ -392,7 +393,7 @@ void PCCoreSystem::UpdateCameras ()
     }
 }
 
-void PCCoreSystem::SynchroniseCameras ()
+void PcSystem::SynchroniseCameras ()
 {
     for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
         cam->second->StopAcquisition ();
@@ -400,7 +401,7 @@ void PCCoreSystem::SynchroniseCameras ()
 
     boost::thread_group syncThreads;
     for ( auto cam = m_activeCameras.begin (); cam != m_activeCameras.end (); cam++ ) {
-        syncThreads.create_thread ( boost::bind ( &PCCoreCamera::Synchronise, &(*(cam->second)) ) );
+        syncThreads.create_thread ( boost::bind ( &PcCamera::Synchronise, &(*(cam->second)) ) );
     }
     syncThreads.join_all ();
         
@@ -409,9 +410,9 @@ void PCCoreSystem::SynchroniseCameras ()
     }
 }
 
-void PCCoreSystem::CalibrateCameras ()
+void PcSystem::CalibrateCameras ()
 {
-    //pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
+    //PcCalibrationHelper& calib = PcCalibrationHelper::GetInstance ();
     //calib.StartCalibration ();
     for ( auto camera = m_activeCameras.begin (); camera != m_activeCameras.end (); camera++ ) {
         camera->second->StartCalibration ();

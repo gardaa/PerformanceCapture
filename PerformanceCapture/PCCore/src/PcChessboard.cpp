@@ -1,12 +1,12 @@
-#include "Chessboard.h"
+#include "PcChessboard.h"
 
 using namespace pcc;
 
 // ----------------------------------------------------------------------
-// Chessboard
+// PcChessboard
 // ----------------------------------------------------------------------
 // Public
-Chessboard::Chessboard (
+PcChessboard::PcChessboard (
     unsigned int const&     iRows,
     unsigned int const&     iCols,
     float const&            iSquareSize
@@ -20,10 +20,10 @@ Chessboard::Chessboard (
         }   
     }
 }
-std::vector< std::vector< cv::Point3f > > Chessboard::CreateInputArray (
+VECOFVECS(cv::Point3f) PcChessboard::CreateInputArray (
     unsigned int        iFrameCount
 ) {
-    std::vector< std::vector< cv::Point3f > > srcArray;
+    VECOFVECS(cv::Point3f) srcArray;
 
     while ( iFrameCount-- ) {
         srcArray.push_back ( GetPoints () );

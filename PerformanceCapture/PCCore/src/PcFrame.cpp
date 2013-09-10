@@ -1,15 +1,17 @@
-#include "PCCoreFrame.h"
+#include "PcFrame.h"
 
-#include "PCCoreErrChk.h"
-#include "PCCoreCommon.h"
+#include "PcErrChk.h"
+#include "PcCommon.h"
 
-PCCoreFrame::PCCoreFrame ()
+using namespace pcc;
+
+PcFrame::PcFrame ()
     :   m_gpuImage ()
     ,   m_cpuImage ( 1080, 1920, CV_8UC1, cv::Scalar(0) )
     ,   m_mutex ()
 {}
 
-PCCoreFrame::PCCoreFrame (
+PcFrame::PcFrame (
     unsigned int const&     iWidth,
     unsigned int const&     iHeight,
     unsigned int const&     iNumChannels,
@@ -23,8 +25,8 @@ PCCoreFrame::PCCoreFrame (
     m_gpuImage.upload ( m_cpuImage );
 }
 
-//PCCoreFrame::PCCoreFrame (
-//    PCCoreFrame const& iOther
+//PcFrame::PcFrame (
+//    PcFrame const& iOther
 //) {
 //    //++(*(iOther.m_refCount));
 //    //m_refCount = iOther.m_refCount;
@@ -32,7 +34,7 @@ PCCoreFrame::PCCoreFrame (
 //    //m_cpuImage = iOther.m_cpuImage;
 //}
 
-PCCoreFrame::~PCCoreFrame ()
+PcFrame::~PcFrame ()
 {
     //if ( m_refCount && --(*m_refCount) == 0u ) {
     //    PCC_OBJ_FREE ( m_gpuImage );
@@ -41,7 +43,7 @@ PCCoreFrame::~PCCoreFrame ()
     //}
 }
 
-void PCCoreFrame::Reset (
+void PcFrame::Reset (
     unsigned int const&     iWidth,
     unsigned int const&     iHeight,
     unsigned int const&     iNumChannels,
@@ -55,17 +57,17 @@ void PCCoreFrame::Reset (
     m_gpuImage.upload ( m_cpuImage );
 }
 
-int const& PCCoreFrame::Width () const
+int const& PcFrame::Width () const
 {
     return m_cpuImage.cols;
 }
 
-int const& PCCoreFrame::Height () const
+int const& PcFrame::Height () const
 {
     return m_cpuImage.rows;
 }
 
-void PCCoreFrame::GetData (
+void PcFrame::GetData (
     unsigned char const*&   oData,
     unsigned int&           oNumChannels
 ) const {
@@ -73,11 +75,11 @@ void PCCoreFrame::GetData (
     oNumChannels = m_cpuImage.channels ();
 }
 
-//PCCoreFrame& PCCoreFrame::operator= (
-//    PCCoreFrame const&      iOther
+//PcFrame& PcFrame::operator= (
+//    PcFrame const&      iOther
 //) {
 //    if ( this != &iOther ) {
-//        this->~PCCoreFrame ();
+//        this->~PcFrame ();
 //
 //        ++(*(iOther.m_refCount));
 //        m_refCount = iOther.m_refCount;

@@ -1,54 +1,55 @@
-#include "CameraCalibration.h"
+#include "PcCameraCalibration.h"
 
-#include "PCCoreCommon.h"
+#include "PcCommon.h"
 
-#include "PCCoreCamera.h"
-#include "CalibrationHelper.h"
-#include "PCCoreSystem.h"
+#include "PcCamera.h"
+#include "PcCalibrationHelper.h"
+#include "PcSystem.h"
+
+using namespace pcc;
 
 // ----------------------------------------------------------------------
-// CameraCalibration
+// PcCameraCalibration
 // ----------------------------------------------------------------------
 // Public
-pcc::CameraCalibration::CameraCalibration ( PCCoreCamera* iParent )
+PcCameraCalibration::PcCameraCalibration ( PcCamera* iParent )
     :   m_mutex ()
     ,   m_stateMutex ()
     ,   m_calibState ( UNKNOWN )
-    ,   m_calibThread ( (boost::thread*) 0x0 )
+    ,   m_calibThread ( (ThreadType*) 0x0 )
     ,   m_frameQueue ()
     ,   m_frameList ()
     ,   m_corners ()
     ,   m_camera ( iParent )
     ,   m_count ( 0u )
-    ,   m_fuckupCount ( 0u )
 {}
-pcc::CameraCalibration::~CameraCalibration ()
+PcCameraCalibration::~PcCameraCalibration ()
 {
-    boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-    boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+    UpgradeLockType upgradedLock ( m_mutex );
+    UniqueLockType lock ( upgradedLock );
 
     if ( m_calibThread ) {
         m_calibThread->interrupt ();
     }
     PCC_OBJ_FREE ( m_calibThread );
 }
-void pcc::CameraCalibration::StartCalibration ()
+void PcCameraCalibration::StartCalibration ()
 {
-    boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-    boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+    UpgradeLockType upgradedLock ( m_mutex );
+    UniqueLockType lock ( upgradedLock );
 
     DoStartCalibration ();
 }
-void pcc::CameraCalibration::AbortCalibration ()
+void PcCameraCalibration::AbortCalibration ()
 {
     if ( m_calibState == CALIBRATING || m_calibState == ACQUIRING ) {
         DoAbortCalibration ();
     }
 }
-void pcc::CameraCalibration::Process ()
+void PcCameraCalibration::Process ()
 {
-    PCCoreSystem& cs = PCCoreSystem::GetInstance ();
-    pcc::CalibrationHelper& calib = pcc::CalibrationHelper::GetInstance ();
+    PcSystem& cs = PcSystem::GetInstance ();
+    PcCalibrationHelper& calib = PcCalibrationHelper::GetInstance ();
 
     cv::Size const& size = calib.GetChessboardSize ();
     m_count = 0;
@@ -58,8 +59,8 @@ void pcc::CameraCalibration::Process ()
 
         cv::Mat frame;
         {
-            boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-            boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+            UpgradeLockType upgradedLock ( m_mutex );
+            UniqueLockType lock ( upgradedLock );
 
             if ( !m_frameQueue.empty () ) {
                 frame = m_frameQueue.front ();
@@ -69,7 +70,7 @@ void pcc::CameraCalibration::Process ()
             }
         }
 
-        std::vector<cv::Point2f> corners;
+        VEC(cv::Point2f) corners;
         if ( cv::findChessboardCorners ( frame, size, corners, cv::CALIB_CB_FAST_CHECK ) ) {
             m_frameList.push_back ( frame.clone () );
             m_corners.push_back ( corners );
@@ -89,8 +90,8 @@ void pcc::CameraCalibration::Process ()
 
     m_camera->DoCalibration ( calib.GetChessboardPoints (), m_corners, m_camera->GetFrameSize () );
     {
-        boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-        boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+        UpgradeLockType upgradedLock ( m_mutex );
+        UniqueLockType lock ( upgradedLock );
 
         SetCalibrationState ( CALIBRATED );
         m_listeners.clear ();
@@ -99,45 +100,45 @@ void pcc::CameraCalibration::Process ()
                     << m_camera->DistCoeffs ()      << std::endl;
     }
 }
-void pcc::CameraCalibration::PushFrame ( PCCoreFramePtr const& iFrame )
+void PcCameraCalibration::PushFrame ( PcFramePtr const& iFrame )
 {
-    boost::upgrade_lock<boost::shared_mutex> upgradedLock ( m_mutex );
-    boost::upgrade_to_unique_lock<boost::shared_mutex> lock ( upgradedLock );
+    UpgradeLockType upgradedLock ( m_mutex );
+    UniqueLockType lock ( upgradedLock );
 
     m_frameQueue.push ( iFrame->GetImagePoints ().clone () );
 }
-pcc::CalibrationState pcc::CameraCalibration::GetCalibrationState ()
+CalibrationState PcCameraCalibration::GetCalibrationState ()
 {
     //boost::shared_lock<boost::shared_mutex> lock ( m_stateMutex );
 
     return m_calibState;
 }
-double pcc::CameraCalibration::GetCalibrationProgress () const
+double PcCameraCalibration::GetCalibrationProgress () const
 {
-    return ( (double)m_frameList.size () / (double)pcc::CalibrationHelper::GetInstance ().FrameCount () );
+    return ( (double)m_frameList.size () / (double)PcCalibrationHelper::GetInstance ().FrameCount () );
 }
 
 // Private
-void pcc::CameraCalibration::DoStartCalibration ()
+void PcCameraCalibration::DoStartCalibration ()
 {
     if ( m_calibState == CALIBRATING || m_calibState == ACQUIRING ) {
         DoAbortCalibration ();
     }
 
     SetCalibrationState ( ACQUIRING );
-    m_calibThread = new boost::thread ( boost::bind ( &pcc::CameraCalibration::Process, this ) );
+    m_calibThread = new ThreadType ( boost::bind ( &PcCameraCalibration::Process, this ) );
 }
-void pcc::CameraCalibration::DoAbortCalibration ()
+void PcCameraCalibration::DoAbortCalibration ()
 {
     SetCalibrationState ( UNKNOWN );
 
     PCC_OBJ_FREE ( m_calibThread );
 
-    std::queue<cv::Mat> ().swap ( m_frameQueue );
-    std::vector<cv::Mat> ().swap ( m_frameList );
-    std::vector< std::vector<cv::Point2f> >().swap ( m_corners );
+    QUEUE(cv::Mat) ().swap ( m_frameQueue );
+    VEC(cv::Mat)().swap ( m_frameList );
+    VECOFVECS(cv::Point2f)().swap ( m_corners );
 }
-void pcc::CameraCalibration::SetCalibrationState ( CalibrationState const& iNewState )
+void PcCameraCalibration::SetCalibrationState ( CalibrationState const& iNewState )
 {
     CalibrationState oldState;
     {

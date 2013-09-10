@@ -1,28 +1,28 @@
-#include "ParameterHandler.h"
+#include "PcParameterHandler.h"
 
-const int& ParameterHandler::GetRefreshTimeout ()
+const int& PcParameterHandler::GetRefreshTimeout ()
 {
     return m_refreshTimeout;
 }
-void ParameterHandler::SetRefreshTimeout ( const int& iTimeout )
+void PcParameterHandler::SetRefreshTimeout ( const int& iTimeout )
 {
     m_refreshTimeout = iTimeout;
 
     emit refreshTimeoutChanged ( iTimeout );
 }
 
-const int& ParameterHandler::GetViewportCols ()
+const int& PcParameterHandler::GetViewportCols ()
 {
     return m_viewportCols;
 }
-void ParameterHandler::SetViewportCols ( const int& iViewportCols )
+void PcParameterHandler::SetViewportCols ( const int& iViewportCols )
 {
     m_viewportCols = iViewportCols;
 
     emit numColsChanged ( iViewportCols );
 }
 
-ParameterHandler::ParameterHandler ()
+PcParameterHandler::PcParameterHandler ()
     :   QObject ()
     ,   m_refreshTimeout ( 16 )
     ,   m_viewportCols ( 2 )
