@@ -3,23 +3,23 @@
 
 #include <QMainWindow>
 
-class FrameViewer;
-class PCMainAppMenu;
+class PcFrameViewer;
+class PcAppMenu;
 class QTimer;
 
-class PCMainWindow
+class PcMainWindow
     :   public QMainWindow
 {
     Q_OBJECT
     
 public:
-    PCMainWindow ( QWidget* iParent = 0 );
-    ~PCMainWindow();
+    PcMainWindow ( QWidget* iParent = 0 );
+    ~PcMainWindow();
 
 private:
     // Widgets
-    FrameViewer*    m_frameViewer;
-    PCMainAppMenu*  m_leftMenu;
+    PcFrameViewer*    m_frameViewer;
+    PcAppMenu*  m_leftMenu;
 };
 
 #endif // PCMAINWINDOW_H

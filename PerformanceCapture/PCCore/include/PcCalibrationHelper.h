@@ -1,5 +1,5 @@
-#ifndef PCCALIBRATIONHELPER_H
-#define PCCALIBRATIONHELPER_H
+#ifndef CALIBRATIONHELPER_H
+#define CALIBRATIONHELPER_H
 
 #include "PcCommon.h"
 
@@ -37,4 +37,4 @@ namespace pcc
     };
 }
 
-#endif // PCCALIBRATIONHELPER_H
+#endif // CALIBRATIONHELPER_H

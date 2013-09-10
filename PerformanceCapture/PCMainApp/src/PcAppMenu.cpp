@@ -1,4 +1,4 @@
-#include "PCMainAppMenu.h"
+#include "PcAppMenu.h"
 
 #include <QSlider>
 #include <QLabel>
@@ -9,12 +9,12 @@
 #include <QButtonGroup>
 #include <QPushButton>
 
-#include "ParameterHandler.h"
+#include "PcParameterHandler.h"
 
-PCMainAppMenu::PCMainAppMenu ( QWidget* iParent )
+PcAppMenu::PcAppMenu ( QWidget* iParent )
     :   QDockWidget ( "Parameters", iParent )
 {
-    ParameterHandler& params = ParameterHandler::Instance ();
+    PcParameterHandler& params = PcParameterHandler::Instance ();
 
     m_mainWidget = new QWidget ( this );
     m_settingsWidget = new QGroupBox ( "Settings", this );
@@ -66,15 +66,15 @@ PCMainAppMenu::PCMainAppMenu ( QWidget* iParent )
     setWidget ( m_mainWidget );
 }
 
-PCMainAppMenu::~PCMainAppMenu ()
+PcAppMenu::~PcAppMenu ()
 {}
 
-void PCMainAppMenu::onCalibrationClicked ()
+void PcAppMenu::onCalibrationClicked ()
 {
     emit calibrationClicked ();
 }
 
-void PCMainAppMenu::onSynchronisationClicked ()
+void PcAppMenu::onSynchronisationClicked ()
 {
     emit synchronisationClicked ();
 }

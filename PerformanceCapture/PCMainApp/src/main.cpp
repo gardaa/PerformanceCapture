@@ -1,4 +1,4 @@
-#include "PCMainWindow.h"
+#include "PcMainWindow.h"
 
 #include <QApplication>
 
@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    PCMainWindow w;
+    PcMainWindow w;
     w.showMaximized ();
     
     return a.exec();

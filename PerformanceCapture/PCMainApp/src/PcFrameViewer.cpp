@@ -1,7 +1,7 @@
 #include "PcErrChk.h"
-#include "FrameViewer.h"
+#include "PcFrameViewer.h"
 #include "PcSystem.h"
-#include "ParameterHandler.h"
+#include "PcParameterHandler.h"
 
 #include <gl/GL.h>
 #include <gl/GLU.h>
@@ -15,11 +15,11 @@
 
 using namespace pcc;
 
-FrameViewer::FrameViewer ( QWidget *iParent )
+PcFrameViewer::PcFrameViewer ( QWidget *iParent )
     :   QGLWidget ( iParent ),
         m_nCols ( 0 )
 {
-    ParameterHandler& params = ParameterHandler::Instance ();
+    PcParameterHandler& params = PcParameterHandler::Instance ();
 
     m_updateTimer = new QTimer ( this );
     m_updateTimer->setInterval ( params.GetRefreshTimeout() );
@@ -42,7 +42,7 @@ FrameViewer::FrameViewer ( QWidget *iParent )
     setNumColumns ( params.GetViewportCols () );
 }
 
-FrameViewer::~FrameViewer ()
+PcFrameViewer::~PcFrameViewer ()
 {
     PcSystem& cs = PcSystem::GetInstance ();
     cs.EndCapture ();
@@ -55,7 +55,7 @@ FrameViewer::~FrameViewer ()
     }
 }
 
-void FrameViewer::initializeGL ()
+void PcFrameViewer::initializeGL ()
 {
     glEnable (GL_TEXTURE_2D);
     glShadeModel (GL_SMOOTH);
@@ -68,12 +68,12 @@ void FrameViewer::initializeGL ()
     int x = 0;
     glutInit ( &x, NULL );
 }
-void FrameViewer::resizeGL ( int w, int h )
+void PcFrameViewer::resizeGL ( int w, int h )
 {
     m_width = w;
     m_height = h;
 }
-void FrameViewer::paintGL ()
+void PcFrameViewer::paintGL ()
 {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     PcSystem& cs = PcSystem::GetInstance ();
@@ -99,21 +99,21 @@ void FrameViewer::paintGL ()
     //DrawFrame ( 0, 0, frames[0] );
     //DrawFrame ( 0, 1, frames[1] );
 }
-void FrameViewer::setNumColumns ( int c )
+void PcFrameViewer::setNumColumns ( int c )
 {
     PcSystem& cs = PcSystem::GetInstance ();
     m_nCols = c;
     AdjustGrid ( cs.GetNumFrames () );
 }
 
-void FrameViewer::calibrateCameras ()
+void PcFrameViewer::calibrateCameras ()
 {
     PcSystem& cs = PcSystem::GetInstance ();
 
     cs.CalibrateCameras ();
 }
 
-void FrameViewer::DrawFrame ( int const& row, int const& col, PcFramePtr const& frame, std::string const& cameraStatus, float const& progress )
+void PcFrameViewer::DrawFrame ( int const& row, int const& col, PcFramePtr const& frame, std::string const& cameraStatus, float const& progress )
 {
     int vpw = m_width  / m_nCols;
     int vph = m_height / m_nRows;
@@ -245,7 +245,7 @@ void FrameViewer::DrawFrame ( int const& row, int const& col, PcFramePtr const& 
     glPopMatrix ();
 }
 
-void FrameViewer::AdjustGrid ( int const& nElems )
+void PcFrameViewer::AdjustGrid ( int const& nElems )
 {
     m_nRows = (nElems / m_nCols);
     if ( nElems % m_nCols ) {

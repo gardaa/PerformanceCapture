@@ -1,5 +1,5 @@
-#ifndef FRAMEVIEWER_H
-#define FRAMEVIEWER_H
+#ifndef PCFRAMEVIEWER_H
+#define PCFRAMEVIEWER_H
 
 #include <QGLWidget>
 #include <VimbaCPP/Include/VimbaCPP.h>
@@ -9,13 +9,13 @@
 
 class QTimer;
 
-class FrameViewer : public QGLWidget
+class PcFrameViewer : public QGLWidget
 {
     Q_OBJECT
     
 public:
-    explicit FrameViewer ( QWidget* iParent = 0 );
-    ~FrameViewer ();
+    explicit PcFrameViewer ( QWidget* iParent = 0 );
+    ~PcFrameViewer ();
     
 signals:
 
@@ -41,4 +41,4 @@ private:
     QTimer*     m_updateTimer;
 };
 
-#endif // FRAMEVIEWER_H
+#endif // PCFRAMEVIEWER_H

@@ -1,15 +1,15 @@
 #include "PcErrChk.h"
-#include "PCMainWindow.h"
-#include "FrameViewer.h"
-#include "ParameterHandler.h"
-#include "PCMainAppMenu.h"
+#include "PcMainWindow.h"
+#include "PcFrameViewer.h"
+#include "PcParameterHandler.h"
+#include "PcAppMenu.h"
 
 #include <QTimer>
 #include <VimbaCPP/Include/VimbaSystem.h>
 
 using namespace AVT;
 
-PCMainWindow::PCMainWindow ( QWidget *iParent )
+PcMainWindow::PcMainWindow ( QWidget *iParent )
     :   QMainWindow ( iParent )
 {
     // VimbaSystem setup.
@@ -18,11 +18,11 @@ PCMainWindow::PCMainWindow ( QWidget *iParent )
     err = vmbs.Startup ();
     ERR_CHK ( err, VmbErrorSuccess, "Error initializing VimbaSystem." );
 
-    ParameterHandler& params = ParameterHandler::Instance ();
+    PcParameterHandler& params = PcParameterHandler::Instance ();
 
     // Member initialization.
-    m_frameViewer = new FrameViewer ( this );
-    m_leftMenu = new PCMainAppMenu ( this );
+    m_frameViewer = new PcFrameViewer ( this );
+    m_leftMenu = new PcAppMenu ( this );
 
     // Wiring
     connect (
@@ -39,7 +39,7 @@ PCMainWindow::PCMainWindow ( QWidget *iParent )
     addDockWidget ( Qt::DockWidgetArea::LeftDockWidgetArea, m_leftMenu );
 }
 
-PCMainWindow::~PCMainWindow()
+PcMainWindow::~PcMainWindow()
 {
     // Shuts down the operating VimbaSystem.
     VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();
