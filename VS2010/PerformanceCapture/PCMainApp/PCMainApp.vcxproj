@@ -134,6 +134,9 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\PerformanceCapture\PCMainApp\Mainpage.dox" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\PCCore\PCCore.vcxproj">
       <Project>{c6eddeea-1d63-459d-a8c7-c9434628f15a}</Project>
     </ProjectReference>

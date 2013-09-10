@@ -41,6 +41,9 @@
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcSystem.cpp" />
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcFrameObserver.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\PerformanceCapture\PCCore\Mainpage.dox" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C6EDDEEA-1D63-459D-A8C7-C9434628F15A}</ProjectGuid>
     <RootNamespace>PCCore</RootNamespace>

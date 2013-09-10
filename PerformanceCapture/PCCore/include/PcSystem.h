@@ -19,6 +19,7 @@ using namespace AVT;
 #define BOOST_ALL_DYN_LINK
 #include <boost/thread/thread.hpp>
 
+/// The main namespace of the PerformanceCapture core library.
 namespace pcc
 {
     class PcSystem

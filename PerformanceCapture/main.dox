@@ -1,0 +1,7 @@
+///
+/// \mainpage PerformanceCapture documentation
+///
+/// The PerformanceCapture software is divided into two modules:
+/// - \subpage pccore
+/// - \subpage pcmain
+///

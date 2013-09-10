@@ -1,74 +1,83 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Fichiers sources">
+    <Filter Include="Documentation">
+      <UniqueIdentifier>{7ae8a669-dec3-48ea-a48a-eb47c041ae31}</UniqueIdentifier>
+      <Extensions>dox</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Fichiers d%27en-tête">
+    <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcCalibrationHelper.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcCameraCalibration.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcChessboard.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcCamera.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcCommon.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcErrChk.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcExport.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcFrame.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcFrameObserver.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcStereoCameraPair.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcSystem.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcCalibrationHelper.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcCameraCalibration.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcChessboard.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcCamera.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcFrame.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcFrameObserver.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcStereoCameraPair.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcSystem.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Mainpage.dox">
+      <Filter>Documentation</Filter>
+    </None>
   </ItemGroup>
 </Project>
