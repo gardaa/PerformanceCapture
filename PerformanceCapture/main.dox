@@ -1,7 +1,11 @@
-///
-/// \mainpage PerformanceCapture documentation
-///
-/// The PerformanceCapture software is divided into two modules:
+/// 
+/// \mainpage Documentation
+/// 
+/// The PerformanceCapture suite is a basic framework to work with stereo camera pairs for the acquisition of an actor's
+/// performance in order to animate a 3D model. However, currently only the interaction 
+/// with the cameras is fully implemented.
+/// 
+/// It is divided in two modules:
 /// - \subpage pccore
 /// - \subpage pcmain
-///
+/// 

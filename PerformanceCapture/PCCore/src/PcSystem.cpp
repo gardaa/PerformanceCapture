@@ -20,7 +20,6 @@ using namespace pcc;
 static unsigned int const MAX_BW = 124000000;
 
 VmbAPI::ICameraListObserverPtr PcSystem::sm_pInstance ( (PcSystem*)0x0 );
-int PcSystem::sm_nAvailableCameras = 0;
 
 PcSystem::PcSystem()
     :   VmbAPI::ICameraListObserver ()
@@ -136,6 +135,8 @@ PcSystem& PcSystem::GetInstance ()
 }
 void PcSystem::DestroyInstance ()
 {
+    VmbAPI::VimbaSystem& vmbs = VmbAPI::VimbaSystem::GetInstance ();
+    vmbs.UnregisterCameraListObserver ( sm_pInstance );
     sm_pInstance.reset ( (PcSystem*)0x0 );
 }
 

@@ -11,6 +11,8 @@
 
 #include "PcParameterHandler.h"
 
+using namespace pcm;
+
 PcAppMenu::PcAppMenu ( QWidget* iParent )
     :   QDockWidget ( "Parameters", iParent )
 {
@@ -29,7 +31,7 @@ PcAppMenu::PcAppMenu ( QWidget* iParent )
     QSizePolicy sizePolicy ( QSizePolicy::Minimum, QSizePolicy::Minimum );
     
     // Component instantiation
-    m_numColumns = new QSlider ( Qt::Orientation::Horizontal, this );
+    m_numColumns = new QSlider ( Qt::Horizontal, this );
 
     // Label creation
     
@@ -62,12 +64,9 @@ PcAppMenu::PcAppMenu ( QWidget* iParent )
     mainLayout->addWidget ( m_controlsWidget );
     mainLayout->addStretch ( 0 );
 
-    setFeatures ( QDockWidget::DockWidgetFeature::NoDockWidgetFeatures );
+    setFeatures ( QDockWidget::NoDockWidgetFeatures );
     setWidget ( m_mainWidget );
 }
-
-PcAppMenu::~PcAppMenu ()
-{}
 
 void PcAppMenu::onCalibrationClicked ()
 {

@@ -1,5 +1,7 @@
 #include "PcParameterHandler.h"
 
+using namespace pcm;
+
 const int& PcParameterHandler::GetRefreshTimeout ()
 {
     return m_refreshTimeout;

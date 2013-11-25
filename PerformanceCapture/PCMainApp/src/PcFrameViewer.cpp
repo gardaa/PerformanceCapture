@@ -14,6 +14,7 @@
 #include <QTimer>
 
 using namespace pcc;
+using namespace pcm;
 
 PcFrameViewer::PcFrameViewer ( QWidget *iParent )
     :   QGLWidget ( iParent ),

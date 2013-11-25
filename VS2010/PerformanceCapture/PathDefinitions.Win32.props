@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <QTDIR>C:\Shared\Qt\Qt5.1.1\5.1.1\msvc2010_opengl</QTDIR>
+    <BOOST_ROOT>..\..\..\3rdparty\boost_1_54_0</BOOST_ROOT>
+    <OPENCV_ROOT>..\..\..\3rdparty\OpenCV\2.4.6</OPENCV_ROOT>
+    <FREEGLUT_ROOT>..\..\..\3rdparty\freeglut-2.8.1</FREEGLUT_ROOT>
+    <PVAPI_ROOT>C:\Program Files\Allied Vision Technologies\GigESDK</PVAPI_ROOT>
+    <VIMBA_INCLUDE>$(VIMBA_HOME)</VIMBA_INCLUDE>
+    <VIMBA_LIB>$(VIMBA_HOME)VimbaCPP\Lib\Win32</VIMBA_LIB>
+    <VIMBA_BIN>$(VIMBA_HOME)\VimbaCPP\Bin\Win32</VIMBA_BIN>
+    <BOOST_INCLUDE>$(BOOST_ROOT)</BOOST_INCLUDE>
+    <BOOST_LIB>$(BOOST_ROOT)\Win32\lib\</BOOST_LIB>
+    <BOOST_BIN>$(BOOST_ROOT)\Win32\lib\</BOOST_BIN>
+    <OPENCV_INCLUDE>$(OPENCV_ROOT)\Win32\install\include\</OPENCV_INCLUDE>
+    <OPENCV_LIB>$(OPENCV_ROOT)\Win32\install\lib\</OPENCV_LIB>
+    <OPENCV_BIN>$(OPENCV_ROOT)\Win32\install\bin\</OPENCV_BIN>
+    <FREEGLUT_INCLUDE>$(FREEGLUT_ROOT)\include</FREEGLUT_INCLUDE>
+    <FREEGLUT_LIB>$(FREEGLUT_ROOT)\lib\x86</FREEGLUT_LIB>
+    <FREEGLUT_BIN>$(FREEGLUT_ROOT)\lib\x86</FREEGLUT_BIN>
+    <PVAPI_BIN>$(PVAPI_ROOT)\bin-pc</PVAPI_BIN>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(BOOST_INCLUDE);$(OPENCV_INCLUDE);$(VIMBA_INCLUDE)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(BOOST_LIB);$(OPENCV_LIB);$(VIMBA_LIB)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="QTDIR">
+      <Value>$(QTDIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="BOOST_ROOT">
+      <Value>$(BOOST_ROOT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="OPENCV_ROOT">
+      <Value>$(OPENCV_ROOT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="FREEGLUT_ROOT">
+      <Value>$(FREEGLUT_ROOT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="PVAPI_ROOT">
+      <Value>$(PVAPI_ROOT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="VIMBA_INCLUDE">
+      <Value>$(VIMBA_INCLUDE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="VIMBA_LIB">
+      <Value>$(VIMBA_LIB)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="VIMBA_BIN">
+      <Value>$(VIMBA_BIN)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="BOOST_INCLUDE">
+      <Value>$(BOOST_INCLUDE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="BOOST_LIB">
+      <Value>$(BOOST_LIB)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="BOOST_BIN">
+      <Value>$(BOOST_BIN)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="OPENCV_INCLUDE">
+      <Value>$(OPENCV_INCLUDE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="OPENCV_LIB">
+      <Value>$(OPENCV_LIB)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="OPENCV_BIN">
+      <Value>$(OPENCV_BIN)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="FREEGLUT_INCLUDE">
+      <Value>$(FREEGLUT_INCLUDE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="FREEGLUT_LIB">
+      <Value>$(FREEGLUT_LIB)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="FREEGLUT_BIN">
+      <Value>$(FREEGLUT_BIN)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="PVAPI_BIN">
+      <Value>$(PVAPI_BIN)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

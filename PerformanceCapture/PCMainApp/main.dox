@@ -1,8 +1,72 @@
-/// \page pcmain Visualisation module
 /// 
-/// \section pcmainbuild Compiling the visualisation module
-/// Test
+/// \defgroup PCMAIN Visualisation Module
+/// A basic visualisation app that allows to interact with PCCore library's main functionalities.
+/// 
+/// \page pcmain Visualisation module
+/// A basic visualisation app that allows to interact with PCCore library's main functionalities.
+/// 
+/// \section pcmainbuild Building the visualisation module
+/// \subsection pcmpreqs Pre-requisites
+/// In addition to everything needed to build the PCCore library, to build the Visualisation Module, you'll need
+/// to have the following software and libraries:
 ///
+///     - freeglut library version 2.8.1+
+///     - Qt library version 5.0.2+
+///
+/// \subsection pcm3rdparty Building and installing the external libraries
+/// This section will guide you through the process of building every external library needed by the visualisation module.
+/// If you strictly follow this guide, the visualisation module should compile out of the box. Should you prefer to place the
+/// external libraries in different locations than those specified in the guide, the VS2010 project must be changed accordingly.
+/// 
+/// **IMPORTANT**: Note that, even if the Core library module can be built for x64 platforms, the visualisation module
+/// cannot be built targetting x64 platforms unless you recompile the Qt library for 64-bit support, which
+/// is a long and complex process that is beyond the scope of this documentation.
+/// 
+/// \subsubsection freeglut Building the freeglut library
+///     - Download the freeglut source code and extract it to the <tt>3rdparty</tt> folder located in the root of the
+///       PerformanceCapture repository (create it if it isn't there).
+///     - Open a <tt>Visual Studio Command Prompt</tt> (<tt>Visual Studio x64 Win64 Command Prompt</tt> to build the 64-bit
+///       version of the library) from the start menu.
+///     - Navigate to <tt>/path/to/3rdparty/freeglut-2.8.1/Visual Studio/2010/</tt>
+///     - Run the following commands:
+///       <br><tt>devenv /Build "Debug|Win32" /Project freeglut freeglut.sln</tt>
+///       <br><tt>devenv /Build "Release|Win32" /Project freeglut freeglut.sln</tt>
+///       <br>alternatively, for the 64-bit version:
+///       <br><tt>devenv /Build "Debug|x64" /Project freeglut freeglut.sln</tt>
+///       <br><tt>devenv /Build "Release|x64" /Project freeglut freeglut.sln</tt>
+/// 
+/// \subsection pcmcompiling Configuring and compiling the visualisation module
+/// Currently, the visualisation module can only be built under Microsoft Windows, using the Visual C++ 2010 compiler (later versions
+/// might work, but haven't been tested).
+/// Before you start, make sure you have built all of the external libraries as well as the core library. Then, follow these steps to configure
+/// the building environment for the visualisation module:
+///     - Navigate to the <tt>VS2010/PerformanceCapture</tt> folder inside the root of the PerformanceCapture suite.
+///     - Double-click the PerformanceCapture.sln file to launch the solution.
+///     - Open the property manager window (View -> Property Manager) and select the PCMainApp project.
+///     - Open the PathDefinitions.Win32 property sheet and set the user macros according to the following table:
+///         Macro               |  Description
+///         --------------------|-------------
+///         QTDIR               |   Root folder of your Qt5 framework install. <br>Usually, it's the one containing the \p include, \p bin and \p lib folders.
+///         FREEGLUT_ROOT       |   Root folder of the Freeglut library. <br>Usually, it's the one containing the \p src, \p include and \p lib folders.
+///         FREEGLUT_INCLUDE    |   Folder containing the include headers for the freeglut library. <br>Usually <tt>\$(FREEGLUT_ROOT)\\include</tt>.
+///         FREEGLUT_LIB        |   Folder containing the library files (*.lib) of the freeglut library. <br>Usually <tt>\$(FREEGLUT_ROOT)\\lib\\x86</tt>.
+///         FREEGLUT_BIN        |   Folder containing the built 32-bit DLLs of the Boost library. <br>Usually the same as FREEGLUT_LIB.
+///         PVAPI_BIN           |   Folder containing the binary files (PvAPI.dll) of the GigESDK. <br>If you have performed a standard install of the GigESDK, don't touch this.
+/// 
+///     - Repeat the above process for the PathDefinitions.x64 property sheet, providing
+///       the paths to the 64-bit versions of the libraries.
+/// 
 /// \section pcmainrun Running the visualisation module
-/// Test
+/// There are two ways to launch the visualisation module. You can either launch it from within the Visual Studio
+/// IDE, using its Debugging function, or by double-clicking the PCMainApp executable inside the project's output folder.
+/// For both of these to work, you must ensure the PCMainApp executable knows where to find all of the external libraries it needs.
+/// 
+/// If you followed the instructions on this guide, running from within the Visual Studio IDE should work out of the box.
+/// Otherwise, open PCMainApp project's properties by right-clicking it on the solution explorer and selecting properties.
+/// Then, navigate to the debugging menu and on the Environment variable, make sure the path to all the binaries are added to
+/// the PATH debugging environment.
+/// 
+/// For the second method, you can either add all of the binaries paths to the System's PATH environment variable, or copy
+/// all of the necessary libraries to the same location as the PCMainApp executable. Then, double-click the executable to launch
+/// the application.
 ///

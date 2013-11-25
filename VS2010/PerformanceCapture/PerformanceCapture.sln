@@ -10,7 +10,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PCMainApp", "PCMainApp\PCMa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{BFC36410-0C13-4D07-8D7F-2D1E75678AFE}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\PerformanceCapture\Mainpage.dox = ..\..\PerformanceCapture\Mainpage.dox
+		..\..\PerformanceCapture\main.dox = ..\..\PerformanceCapture\main.dox
 	EndProjectSection
 EndProject
 Global

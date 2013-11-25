@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PerformanceCapture\PCCore\include\PcPtpSyncAgent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcCalibrationHelper.cpp">
@@ -74,9 +77,12 @@
     <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\PerformanceCapture\PCCore\src\PcPtpSyncAgent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Mainpage.dox">
+    <None Include="..\..\..\PerformanceCapture\PCCore\main.dox">
       <Filter>Documentation</Filter>
     </None>
   </ItemGroup>

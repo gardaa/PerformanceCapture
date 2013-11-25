@@ -5,6 +5,7 @@
 #include "PcFrame.h"
 #include "PcCamera.h"
 #include "PcSystem.h"
+#include "PcCalibrationHelper.h"
 
 #include <boost/log/trivial.hpp>
 
@@ -25,9 +26,6 @@ PcStereoCameraPair::PcStereoCameraPair (
     SetLeft ( iLeft );
     SetRight ( iRight );
 }
-
-PcStereoCameraPair::~PcStereoCameraPair ()
-{}
 
 void PcStereoCameraPair::OnCameraCalibrated ( PcCamera* iCamera, CalibrationState iOldState, CalibrationState iNewState )
 {

@@ -1,9 +1,11 @@
 #include "PcCamera.h"
 
+#include "PcPtpSyncAgent.h"
 #include "PcCommon.h"
 #include "PcSystem.h"
 #include "PcFrame.h"
 #include "PcFrameObserver.h"
+#include "PcCalibrationHelper.h"
 
 #define BOOST_ALL_DYN_LINK
 #include <boost/thread/thread.hpp>
@@ -31,10 +33,10 @@ PcCamera::PcCamera (
     m_calibration = new PcCameraCalibration ( this );
 }
 
-PcCamera::~PcCamera ()
-{
-    //Release ();
-}
+//PcCamera::~PcCamera ()
+//{
+//    //Release ();
+//}
 
 //void PcCamera::DoCopy ( PcCamera const& iOther )
 //{
@@ -288,7 +290,7 @@ void PcCamera::StartAcquisition ()
     m_isAcquiring = ( err == VmbErrorSuccess );
 
     if ( m_isSynced ) {
-        bool verbose = false;
+        const bool verbose = false;
 
         VmbInt64_t timestamp, timestampClock;
         TryRunFeature ( "GevTimestampControlLatch", verbose );
@@ -311,33 +313,6 @@ void PcCamera::AdjustBandwidth ( unsigned int const& iBandwidth )
     TrySetFeature ( "StreamBytesPerSecond", (VmbInt32_t)iBandwidth, false );
 }
 
-class PtpSyncAgent
-    :   public VmbAPI::IFeatureObserver {
-public:
-    void FeatureChanged ( VmbAPI::FeaturePtr const& pFeature ) {
-        boost::lock_guard<boost::mutex> lock (sm_mutex);
-
-        //std::string sPtpStatus;
-        //m_camera->TryGetFeature ( "PtpStatus", sPtpStatus, false );
-
-        //std::cout << m_camera->GetID() << " PtpStatus changed: " << sPtpStatus << std::endl;
-
-        //m_camera->SetPtpStatus ( sPtpStatus );
-        //bool verbose = true;
-        //if ( ( sPtpStatus.compare ( "Slave" ) == 0 ) || ( sPtpStatus.compare ( "Master" ) == 0 ) ) {
-        //    m_camera->SetSynced ( true );
-        //} else if ( sPtpStatus.compare ( "Error" ) == 0 ) {
-        //    m_camera->SetSynced ( false );
-        //}
-    }
-
-    PtpSyncAgent ( PcCamera* iCamera ) : m_camera ( iCamera ) {}
-private:
-    static boost::mutex     sm_mutex;
-
-    PcCamera*           m_camera;
-};
-boost::mutex PtpSyncAgent::sm_mutex;
 
 void PcCamera::Synchronise ()
 {
@@ -354,7 +329,7 @@ void PcCamera::Synchronise ()
 
     //TryRunFeature ( "GevTimestampControlReset", verbose );
     
-    VmbAPI::IFeatureObserverPtr ptpSyncAgent ( new PtpSyncAgent ( this ) );
+    VmbAPI::IFeatureObserverPtr ptpSyncAgent ( new PcPtpSyncAgent ( this ) );
     TryRegisterObserver ( "EventPtpSyncLocked", ptpSyncAgent, verbose );
     TryRegisterObserver ( "EventPtpSyncLost", ptpSyncAgent, verbose );
     TrySetFeature ( "PtpMode", "Auto", verbose );

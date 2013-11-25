@@ -11,13 +11,16 @@
 
 namespace pcc
 {
+    /// \ingroup PCCORE
+    /// \brief A frame descriptor. Wraps around a cv::Mat object.
+    /// 
+    /// This class is used to 
     class PcFrame
     {
     private:
-        typedef boost::mutex MutexType;
+        typedef boost::mutex    MutexType;  ///< The mutex type to be used to lock the shared resources.
 
     public:
-        // ctors {
         PCCORE_EXPORT PcFrame ();
         PCCORE_EXPORT PcFrame (
             unsigned int const&     iWidth,
@@ -25,13 +28,8 @@ namespace pcc
             unsigned int const&     iNumChannels,
             unsigned char const*&   iData
         );
-        // }
-    
-        // dtor {
         PCCORE_EXPORT ~PcFrame ();
-        // }
 
-        // Accessors {
         PCCORE_EXPORT int const& Width () const;
         PCCORE_EXPORT int const& Height () const;
 
@@ -40,17 +38,14 @@ namespace pcc
             unsigned int&           oNumChannels
         ) const;
         PCCORE_EXPORT cv::Mat const& GetImagePoints () const { return (m_cpuImage); }
-        // }
 
     private:
-        // Copy operations {
-        PCCORE_EXPORT PcFrame (
+        PcFrame (
             PcFrame const&      iOther
         );
-        PCCORE_EXPORT PcFrame& operator= (
+        PcFrame& operator= (
             PcFrame const&      iOther
         );
-        // }
 
     public:
         void Reset (

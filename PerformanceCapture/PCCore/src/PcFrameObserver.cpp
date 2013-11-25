@@ -19,6 +19,3 @@ void PcFrameObserver::FrameReceived ( VmbAPI::FramePtr const pFrame )
 PcFrameObserver::PcFrameObserver ( VmbAPI::CameraPtr const& iCamera )
     :   VmbAPI::IFrameObserver ( iCamera )
 {}
-
-PcFrameObserver::~PcFrameObserver ()
-{}

@@ -1,6 +1,124 @@
-///
-/// \page pccore Core library module
 /// 
-/// \section pccorebuild Compiling the core library module
-/// Test
+/// \defgroup PCCORE Core library
+/// Provides a set of classes, functions and macros to allow programmers
+/// to easily interface with and use a set of stereo AVT Prosilica GT1910c
+/// camera pairs.
+/// 
+/// \page pccore Core library
+/// 
+/// The PCCore library provides a set of classes, functions and macros to
+/// easily interface with a set of AVT Prosilica GT1910c camera pairs.
+/// 
+/// The library aims at simplifying frame acquisition when dealing with multiple
+/// cameras, as well as the calibration process for both single cameras and 
+/// stereo camera pairs.
+/// 
+/// \section pccorebuild Building the core library module
+/// 
+/// \subsection pccpreqs Pre-requisites
+/// In order to successfully build the core library module, your system should be
+/// equipped with the following software and libraries:
+/// 
+///     - Microsoft Visual C++ 2010
+///     - CMake version 2.8+
+///     - Git version 1.8.4+
+///     - NVIDIA CUDA Toolkit version 5.0+
+///     - Boost Library version 1.54.0
+///     - OpenCV Library version 2.4.6 (compiled with GPU support)
+///     - AVT Vimba SDK version 1.2+ (http://www.alliedvisiontec.com/apac/products/software/vimba-sdk.html)
+///     - AVT PvAPI version 1.26+ (http://www.alliedvisiontec.com/apac/products/legacy.html)
+/// 
+/// \subsection pcc3rdparty Building and installing the external libraries
+/// This section will guide you through the process of building every external library needed by the PCCore library module.
+/// If you strictly follow this guide, the PCCore library module should compile out of the box. Should you prefer to place the
+/// external libraries in different locations than those specified in the guide, the VS2010 project must be changed accordingly.
+/// 
+/// \subsubsection boost Building the boost library
+///     - Download the boost library source code and extract it to a folder named <tt>3rdparty</tt> in the root of the 
+///       PerformanceCapture suite (create it if it isn't there).
+///     - Open the windows command prompt and navigate into <tt>/path/to/3rdparty/boost_1_54_0</tt>.
+///     - Navigate to <tt>tools/build/v2/</tt>
+///     - Run <tt>bootstrap.bat</tt>
+///     - Run <tt>b2 install --prefix=/path/to/3rdparty/boost.build/</tt>. This will build the boost compiler and install it to <tt>/path/to/3rdparty/boost.build/</tt>
+///     - Run <tt>set Path=/path/to/3rdparty/boost.build/bin;\%Path\%</tt> . This will add the boost compiler binaries to the system path.
+///     - Navigate back to <tt>/path/to/3rdparty/boost_1_54_0/</tt> and run the following commands:
+///       <br><tt>b2 link=shared variant=debug,release threading=multi address-model=32 stage --stagedir=.\\Win32</tt>
+///       <br><tt>b2 link=shared variant=debug,release threading=multi address-model=64 stage --stagedir=.\\x64</tt>
+/// 
+/// \subsubsection opencv Building the OpenCV library
+/// In order to build the OpenCV library, one should have Git, the NVIDIA CUDA Toolkit and CMake already installed.
+/// The PCCore library was developped using OpenCV version 2.4.6 compiled with CUDA GPU support
+/// (note that, for the time being, CUDA and an NVIDIA GPU are REQUIRED in order to use the PCCore library). Also,
+/// even though we recommend version 5.0+ of the CUDA Toolkit, previous versions might work, but are not guaranteed.
+/// 
+/// Follow these steps to build the OpenCV library:
+///     - Open Git bash and navigate into the <tt>3rdparty</tt> folder in the root of the PerformanceCapture
+///       suite (create it if it isn't there).
+///     - Create a folder named "OpenCV" and switch into it:
+///       <br><tt>mkdir OpenCV</tt>
+///       <br><tt>cd OpenCV</tt>
+///     - Clone the OpenCV repository and checkout to version 2.4.6:
+///       <br><tt>git clone https://github.com/Itseez/opencv ./repos</tt>
+///       <br><tt>git checkout 2.4.6</tt>
+///     - Launch CMake GUI (cmake-gui)
+///     - Type in <tt>/path/to/3rdparty/OpenCV/repos</tt> into the "Where is the source code" text input
+///     - Type in <tt>/path/to/3rdparty/OpenCV/2.4.6/Win32/</tt> into the "Where to build the binaries" text input 
+///       (<tt>/path/to/3rdparty/OpenCV/2.4.6/x64/</tt> to build the 64-bit version of OpenCV).
+///     - Click the Configure button (click yes if prompted to create the target folder).
+///     - On the new window, choose the <tt>Visual Studio 10</tt> generator (<tt>Visual Studio 10 Win64</tt> to build the 64-bit version)
+///       and hit <tt>Finish</tt>.
+///     - Wait for CMake to perform initial setup and then make sure that the following variables are set up as follows:
+///       <br><tt>BUILD_DOCS</tt> is unchecked
+///       <br><tt>BUILD_TESTS</tt> is unchecked
+///       <br><tt>BUILD_PERF_TESTS</tt> is unchecked
+///       <br><tt>BUILD_opencv_python</tt> is unchecked (64-bit only)
+///       <br><tt>WITH_CUDA</tt> is checked
+///       <br><tt>WITH_CUBLAS</tt> is checked
+///       <br><tt>WITH_CUFFT</tt> is checked
+///       <br><tt>WITH_OPENCL</tt> is unchecked
+///       <br><tt>WITH_CLAMDBLAS</tt> is unchecked
+///       <br><tt>WITH_CLAMDFFT</tt> is unchecked
+///       <br><tt>WITH_PVAPI</tt> is unchecked
+///       <br><tt>WITH_GIGEAPI</tt> is unchecked
+///       <br><tt>WITH_EIGEN</tt> is unchecked
+///       <br><tt>CUDA_TOOLKIT_ROOT_DIR</tt> is pointing to the right directory
+///     - If everything is OK, hit the <tt>Generate</tt> button and wait until CMake finishes generating the Visual Studio projects.
+///     - Open the <tt>Visual Studio Commmand Prompt</tt> from the start menu (<tt>Visual Studio x64 Win64 Command Prompt</tt> for the 64-bit version).
+///     - Navigate to the folder containing the generated projects (the one input on the "Where to build the binaries"
+///       text box) and run the following commands (it should take a long time to complete):
+///       <br><tt>devenv /Build Debug /Project INSTALL OpenCV.sln</tt>
+///       <br><tt>devenv /Build Release /Project INSTALL OpenCV.sln</tt>
+///     - If any of the build processes fails, rerun the command and it should work.
 ///
+/// \subsection pcccompiling Configuring and compiling the core library module
+/// Currently, the library can only be built under Microsoft Windows, using the Visual C++ 2010 compiler (later versions
+/// might work, but haven't been tested).
+/// Before you start, make sure you have built all of the external libraries. If you followed the instructions provided in this
+/// documentation, you only need to set up the PVAPI_ROOT and VIMBA_* macros.
+///     - Navigate to the <tt>VS2010/PerformanceCapture</tt> folder inside the root of the PerformanceCapture suite.
+///     - Double-click the <tt>PerformanceCapture.sln</tt> file to launch the solution.
+///     - Open the property manager window (View -> Property Manager) and select the PCCore project.
+///     - Open the PathDefinitions.Win32 property sheet and set the user macros according to the following table:
+///         Macro           |  Description
+///         ----------------|-------------
+///         BOOST_ROOT      |   Root folder of the boost library files. <br>Usually, it's the one containing the \p boost, \p doc and \p libs folders.
+///         OPENCV_ROOT     |   Root folder of the OpenCV install. <br>Usually, it's the \p install folder inside the folder where the binaries were built.
+///         PVAPI_ROOT      |   Root folder of the GigESDK install (the one containing the bin-pc and lib-pc folders). <br>If you performed a standard install of the GigESDK, the standard value should work.
+///         BOOST_INCLUDE   |   Folder containing the include headers for the boost library. <br>Usually the same as BOOST_ROOT.
+///         BOOST_LIB       |   Folder containing the library files (*.lib) of the boost library.
+///         BOOST_BIN       |   Folder containing the built 32-bit DLLs of the Boost library. <br>Usually the same as BOOST_LIB.
+///         VIMBA_INCLUDE   |   Folder containing the header files of the Vimba API. <br>If you have performed a standard install of the Vimba SDK, don't touch this.
+///         VIMBA_LIB       |   Folder containing the library files (*.lib) of the Vimba API. <br>If you have performed a standard install of the Vimba SDK, don't touch this.
+///         VIMBA_BIN       |   Folder containing the 32-bit DLLs of the Vimba SDK. <br>If you have performed a standard install of the Vimba SDK, don't touch this.
+///         OPENCV_INCLUDE  |   Folder containing the header files of the OpenCV library. <br>It usually contains two subfolders - \p opencv and \p opencv2 - within it.
+///         OPENCV_LIB      |   Folder containing the *.lib files to use during the linking proccess.
+///         OPENCV_BIN      |   Folder containing the compiled 32-bit DLLs of OpenCV. <br>Usually the same as OPENCV_LIB.
+/// 
+///     - Repeat the above process for the PathDefinitions.x64 property sheet, providing
+///       the paths to the 64-bit versions of the libraries.
+/// 
+/// To build the PCCore library, open the PerformanceCapture solution within Visual Studio 2010 and follow these steps:
+///     - Select the proper build variant (Debug, Release) from the drop-down menu at the top of the Visual Studio window.
+///     - Select the desired output platform (Win32, x64) from the drop-down menu at the top of the Visual Studio window.
+///     - Right-click the PCCore project on the Solution Explorer window (View -> Solution Explorer) and select <tt>Build</tt>.
+/// 

@@ -8,6 +8,7 @@
 #include <VimbaCPP/Include/VimbaSystem.h>
 
 using namespace AVT;
+using namespace pcm;
 
 PcMainWindow::PcMainWindow ( QWidget *iParent )
     :   QMainWindow ( iParent )
@@ -36,7 +37,7 @@ PcMainWindow::PcMainWindow ( QWidget *iParent )
 
     // Widget setup.
     setCentralWidget ( m_frameViewer );
-    addDockWidget ( Qt::DockWidgetArea::LeftDockWidgetArea, m_leftMenu );
+    addDockWidget ( Qt::LeftDockWidgetArea, m_leftMenu );
 }
 
 PcMainWindow::~PcMainWindow()
