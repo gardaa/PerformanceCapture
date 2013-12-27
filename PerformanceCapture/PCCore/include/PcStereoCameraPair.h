@@ -34,8 +34,8 @@ namespace pcc
         /// \brief Constructor.
         ///
         /// Creates a stereo camera pair from its two component cameras.
-        /// \param iLeft    the left eye of the stereo pair
-        /// \param iRight   the right eye of the stereo pair
+        /// \param [in] iLeft    the left eye of the stereo pair
+        /// \param [in] iRight   the right eye of the stereo pair
         PcStereoCameraPair (
             PcCameraPtr         iLeft,
             PcCameraPtr         iRight
@@ -49,7 +49,8 @@ namespace pcc
 
         /// \brief Callback to be called upon calibration of the component cameras.
         ///
-        /// This 
+        /// This method is called after each camera of the pair is calibrated, via the callback system the PcCamera
+        /// class provides. It will check if both cameras in the pair are calibrated and, if so, launch the stereo calibration.
         void OnCameraCalibrated ( pcc::PcCamera* iCamera, pcc::CalibrationState iOldState, pcc::CalibrationState iNewState );
 
         /// \brief Gets the left-eye camera of the stereo pair.
@@ -59,7 +60,7 @@ namespace pcc
         /// \brief Sets the left-eye camera of the stereo pair.
         ///
         /// Sets the left eye of the stereo pair to a new camera and registers the calibration callback.
-        /// \param iNewLeft    a pointer to the new left eye of the stereo pair
+        /// \param [in] iNewLeft        a pointer to the new left eye of the stereo pair
         inline void SetLeft ( PcCameraPtr const iNewLeft ) {
             m_left = iNewLeft;
             m_left->RegisterCallback ( this, &pcc::PcStereoCameraPair::OnCameraCalibrated );
@@ -72,7 +73,7 @@ namespace pcc
         /// \brief Sets the right-eye camera of the stereo pair.
         ///
         /// Sets the right eye of the stereo pair to a new camera and registers the calibration callback.
-        /// \param iNewRight    a pointer to the new right eye of the stereo pair
+        /// \param [in] iNewRight       a pointer to the new right eye of the stereo pair
         inline void SetRight ( PcCameraPtr const iNewRight ) {
             m_right = iNewRight;
             m_right->RegisterCallback ( this, &pcc::PcStereoCameraPair::OnCameraCalibrated );
@@ -97,19 +98,19 @@ namespace pcc
         /// \brief Private copy constructor.
         ///
         /// Disables copy of PcStereoCameraPair objects.
-        /// \param iOther   the object to be copied
+        /// \param [in] iOther      the object to be copied
         PcStereoCameraPair ( PcStereoCameraPair const& iOther ) {}
 
         /// \brief Private assignment operator.
         ///
         /// Disables assignment operations on PcStereoCameraPair objects.
-        /// \param iOther   the object to be assigned to this object.
+        /// \param [in] iOther      the object to be assigned to this object.
         /// \return this object, unchanged
         PcStereoCameraPair& operator= ( PcStereoCameraPair const& iOther ) { return (*this); }
 
     private:
         PcCameraPtr                     m_left;                 ///< The left eye of the stereo pair.
-        PcCameraPtr                     m_right;    			///< The right eye of the stereo pair.
+        PcCameraPtr                     m_right;                ///< The right eye of the stereo pair.
     
         cv::Mat                         m_stereoRotation;       ///< The rotation matrix.
         cv::Mat                         m_stereoTranslation;    ///< The translation matrix.

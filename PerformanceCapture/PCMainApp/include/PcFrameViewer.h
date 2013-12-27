@@ -15,7 +15,8 @@ namespace pcm
     /// 
     /// \brief The frame display.
     /// 
-    /// Displays current frames from the cameras in a grid. The number of columns in the grid can be specified by the user.
+    /// Displays current frames from the cameras in a grid. The number of columns in the grid can be specified by 
+    /// the user and each cell of the grid is drawn on a separate GL viewport.
     class PcFrameViewer 
         :   public QGLWidget
     {
@@ -81,7 +82,7 @@ namespace pcm
     private:
         /// \brief Draw one cell of the grid.
         /// 
-        /// Given a frame image and its position on the grid, uploads the frame image into the textre memory
+        /// Given a frame image and its position on the grid, uploads the frame image into the texture memory
         /// and draw a single textured rectangle on a separate GL viewport, using the frame image as texture.
         /// 
         /// Also, draws a small square on the top-right corner of the image to indicate the synchronisation status. A red square indicates

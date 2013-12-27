@@ -26,14 +26,27 @@ namespace pcm
         const int& GetViewportCols ();
 
     signals:
+        /// \brief Signals listeners that the number of columns has been changed.
         void numColsChanged (int);
+
+        /// \brief Signals listeners that the screen refresh rate has changed.
         void refreshTimeoutChanged (int);
 
     public slots:
+        /// \brief Changes the screen refresh timeout.
+        /// \param [in] iTimeout    the new time to wait between screen refreshes.
         void SetRefreshTimeout ( const int& iTimeout );
+
+        /// \brief Changes the number of columns on the viewport grid.
+        /// \param [in] iViewportCols   the new number of columns on the grid.
         void SetViewportCols ( const int& iViewportCols );
 
     public:
+        /// \brief Gets the singleton instance of the parameter handler.
+        ///
+        /// Allocates and returns a new static instance of the parameter handler.
+        ///
+        /// \return the singleton instance of the parameter handler.
         static inline PcParameterHandler& Instance () {
             static PcParameterHandler _instance;
             
@@ -47,6 +60,12 @@ namespace pcm
         ///     - Refresh rate of 16ms
         ///     - 2 columns on the grid
         PcParameterHandler ();
+
+        /// \brief Private copy constructor.
+        ///
+        /// Prevents copy of the ParameterHandler singleton object.
+        ///
+        /// \param [in] iOther  the instance from where to copy data.
         explicit PcParameterHandler ( PcParameterHandler const& iOther ) {}
 
     private:

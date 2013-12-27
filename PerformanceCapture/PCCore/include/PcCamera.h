@@ -19,13 +19,13 @@ namespace pcc
 {
     /// \ingroup    PCCORE 
     ///
-    /// \brief      Wraps around the AVT::VmbAPI::Camera class.
+    /// \brief      Wrapper for the AVT::VmbAPI::Camera class.
     ///
-    /// This class provides easier access and initialisation of AVT::VmbAPI::Camera objects.
+    /// This class provides easier access to and initialisation of AVT::VmbAPI::Camera objects.
     /// The PcCamera class aims to provide easier access to camera calibration, PTP camera synchronisation,
     /// frame stream acquisition and GigE parameter regulation so that multiple cameras can be used on a single ethernet card.
     /// No instance of a PcCamera is guaranteed to have it's underlying VmpAPI::Camera object open, initialised and ready to
-    /// operate until it's Setup method has been called. This means that:
+    /// operate until it's Setup method has been called. A call to the Setup method means that:
     ///     - The underlying Camera object has been opened for manipulation
     ///     - The proper amount of bandwidth has been reserved for the camera to avoid packet collision in a scenario where
     ///       the input from multiple cameras comes through a single ethernet interface
@@ -33,7 +33,7 @@ namespace pcc
     ///     - The hardware gain of the camera is set to "Auto", to decrease the set-up time of the physical cameras
     /// 
     /// The PcCamera class caches data such as:
-    ///     - Frame dimensions
+    ///     - Dimension of the frames on the stream
     ///     - Camera's unique id, used to refer to it across multiple contexts
     ///     - Camera's PTP synchronisation status
     /// 
@@ -125,7 +125,7 @@ namespace pcc
 
         /// \brief Calculates the current progress, in percentage, of the calibration process.
         ///
-        /// \returns a double contained in the interval [0,1]
+        /// \return a double in the interval [0,1] representing the progress of the calibration
         PCCORE_EXPORT double GetCalibrationProgress () const;
 
         /// \brief Gets the list of detected chessboard corners in each calibration frame.
@@ -192,7 +192,7 @@ namespace pcc
         inline bool const& IsAcquiring () { return m_isAcquiring; }
     
         /// \brief Gets the camera's frame dimensions (read-only).
-        /// \return a cv::Size structure containing the fame's dimensions
+        /// \return a cv::Size structure containing the frame's dimensions
         inline cv::Size const& GetFrameSize () { return m_frameSize; }
 
     private:

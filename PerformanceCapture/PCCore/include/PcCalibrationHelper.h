@@ -16,9 +16,9 @@ namespace pcc
     /// \brief      Provides useful information for the calibration process.
     ///
     /// This class facilitates the camera calibration process by providing useful information 
-    /// on the calibration process, such as:
+    /// about the calibration process, such as:
     ///     - The time-delay between consecutive frame captures  
-    ///     - The number of frames to be used on the calibration process.  
+    ///     - The number of image frames to be used to calibrate the camera.  
     ///     - The points on R^3 describing the chessboard to be detected in calibration images.  
     ///     - The size of the chessboard to be detected.
     ///
@@ -71,14 +71,14 @@ namespace pcc
         ///
         /// Since PcCalibrationHelper is a singleton, we forbid copy operations.
         /// 
-        /// \param  iOther  The instance to be copied.
+        /// \param [in] iOther      The instance to be copied.
         inline explicit PcCalibrationHelper ( PcCalibrationHelper const& iOther ) {}
 
         /// \brief  Private assignment operator to avoid unintentional assignment.
         ///
         /// Since PcCalibrationHelper is a singleton, we forbid copy operations.
         /// 
-        /// \param  iOther  The instance to be assigned.
+        /// \param [in] iOther      The instance from which to copy data.
         /// 
         /// \return This object, unmodified.
         inline PcCalibrationHelper& operator= ( PcCalibrationHelper const& iOther ) { return (*this); }

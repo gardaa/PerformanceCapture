@@ -37,7 +37,8 @@ namespace pcm
     public:
         /// \brief The constructor.
         /// 
-        /// Instantiates and initialises 
+        /// Instantiates and initialises the app menu.
+        ///
         /// \param iParent a pointer to the QWidget instance that owns the menu
         explicit PcAppMenu ( QWidget* iParent = 0 );
 

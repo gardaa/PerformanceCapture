@@ -34,14 +34,14 @@ PcFrame::PcFrame (
 //    //m_cpuImage = iOther.m_cpuImage;
 //}
 
-PcFrame::~PcFrame ()
-{
-    //if ( m_refCount && --(*m_refCount) == 0u ) {
-    //    PCC_OBJ_FREE ( m_gpuImage );
-    //    PCC_OBJ_FREE ( m_cpuImage );
-    //    PCC_OBJ_FREE ( m_refCount );
-    //}
-}
+//PcFrame::~PcFrame ()
+//{
+//    //if ( m_refCount && --(*m_refCount) == 0u ) {
+//    //    PCC_OBJ_FREE ( m_gpuImage );
+//    //    PCC_OBJ_FREE ( m_cpuImage );
+//    //    PCC_OBJ_FREE ( m_refCount );
+//    //}
+//}
 
 void PcFrame::Reset (
     unsigned int const&     iWidth,

@@ -61,7 +61,8 @@
 /// IDE, using its Debugging function, or by double-clicking the PCMainApp executable inside the project's output folder.
 /// For both of these to work, you must ensure the PCMainApp executable knows where to find all of the external libraries it needs.
 /// 
-/// If you followed the instructions on this guide, running from within the Visual Studio IDE should work out of the box.
+/// If you followed the instructions on this guide, running from within the Visual Studio IDE should work out of the box. Just set the PCMainApp
+/// project as your startup project (right-click it and select "Set as StartUp Project") and hit F5.
 /// Otherwise, open PCMainApp project's properties by right-clicking it on the solution explorer and selecting properties.
 /// Then, navigate to the debugging menu and on the Environment variable, make sure the path to all the binaries are added to
 /// the PATH debugging environment.

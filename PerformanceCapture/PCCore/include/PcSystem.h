@@ -176,7 +176,7 @@ namespace pcc
 
         /// \brief Launches the calibration process on all available cameras.
         ///
-        /// Iterates over the list of all available cameras and calls the PcCamera::StartCalibration method.
+        /// Iterates over the list of all available cameras and calls the PcCamera::StartCalibration method on each one of them.
         PCCORE_EXPORT void CalibrateCameras ();
 
         /// \brief Sets the current frame for a given camera.

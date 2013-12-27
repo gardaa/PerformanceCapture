@@ -28,14 +28,14 @@ namespace pcc
     /// \brief Performs the calibration process of a given camera.
     ///
     /// Correct camera calibration is an important part of any computer vision application.
-    /// It ensures the correct correspondence between world-space coordinates and image-space coordinates (or projection),
+    /// It ensures the correct matching between world-space coordinates and image-space coordinates (or projection),
     /// taking into account the position and angle a camera has been set-up, as well as it's internal parameters,
     /// such as focal distance, axis scaling (i.e. the resolution in pixels in both x and y directions in image space),
     /// and camera distortion.
     /// 
     /// This class provides the user with a simple interface to calculate these projection parameters.
-    /// Once the calibration process is running, a predefined number of frames will be captured continuously, with a given interval between captures. to the purpose of
-    /// derivating the camera's internal and external parameters. During the calibration process, the user is required to place
+    /// Once the calibration process is running, a predefined number of frames will be captured continuously, with a given interval between captures, 
+    /// to the purpose of derivating the camera's internal and external parameters. During the calibration process, the user is required to place
     /// a chessboard of known dimensions in front of the cameras, changing it's position and orientation
     /// continuously in time.
     ///
@@ -107,7 +107,7 @@ namespace pcc
         /// \brief Gets the progress of the calibration process, in percentage.
         ///
         /// Calculates the ratio between the currently acquired frames and the required amount.
-        /// \return a double in the interval [0,1]
+        /// \return a double in the interval [0,1] representing the progress of the calibration process
         double GetCalibrationProgress () const;
 
         /// \brief Gets the chessboard corners detected during the acquisition phase.
@@ -181,7 +181,7 @@ namespace pcc
 
         PcCamera*                       m_camera;       ///< The parent PcCamera
 
-        unsigned int                    m_count;        ///< The frame counter used to calculate the filenames of outputted frames.
+        unsigned int                    m_count;        ///< The frame counter used to build the filenames of outputted frames.
         VEC(CallbackFn)                 m_listeners;    ///< The list of listeners to be notified of a state change.
     };
 }
